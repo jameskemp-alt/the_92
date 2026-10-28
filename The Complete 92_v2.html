@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>The Complete 92</title>
+<style>
+  :root{
+    --turf-dark:#e6ede0;
+    --turf-mid:#dde6d6;
+    --chalk:#10301d;
+    --chalk-dim:#4f6355;
+    --gold:#b07d10;
+    --gold-bright:#94680a;
+    --bare:#8a7558;
+    --wales-red:#c8393a;
+    --card:#f6f8f2;
+    --card-line:rgba(16,48,29,0.14);
+    --sea:#cfdde3;
+    --land-empty:#c5ced6;
+    --land-line:#f6f8f2;
+    --scotland:#d3d8cf;
+    --label-dark:#10301d;
+    --label-light:#ffffff;
+    --scrim:rgba(10,30,18,0.45);
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --turf-dark:#0c2818; --turf-mid:#123420; --chalk:#f4efe1; --chalk-dim:#c9c2ab;
+      --gold:#e8b43a; --gold-bright:#f6cc5c; --bare:#5a4a34; --card:#0f2e1c;
+      --card-line:rgba(244,239,225,0.12); --sea:#0a2014; --land-empty:#3a4752;
+      --land-line:#0c2818; --scotland:#1f3328; --scrim:rgba(0,0,0,0.6);
+      color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --turf-dark:#0c2818; --turf-mid:#123420; --chalk:#f4efe1; --chalk-dim:#c9c2ab;
+    --gold:#e8b43a; --gold-bright:#f6cc5c; --bare:#5a4a34; --card:#0f2e1c;
+    --card-line:rgba(244,239,225,0.12); --sea:#0a2014; --land-empty:#3a4752;
+    --land-line:#0c2818; --scotland:#1f3328; --scrim:rgba(0,0,0,0.6);
+    color-scheme:dark;
+  }
+  :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);}
+  html{scroll-padding-top:env(safe-area-inset-top,0px);}
+  *,*::before,*::after{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--turf-dark);
+    background-image:repeating-linear-gradient(180deg, var(--turf-dark) 0px, var(--turf-dark) 40px, var(--turf-mid) 40px, var(--turf-mid) 80px);
+    color:var(--chalk);
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    min-height:100vh;
+    padding:0 0 60px 0;
+  }
+  button{font-family:inherit;}
+  :focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
+  /* ---- Masthead ---- */
+  .masthead{padding:28px 20px 18px;text-align:center;border-bottom:3px solid var(--gold);background:linear-gradient(180deg, rgba(0,0,0,0.12), transparent);}
+  .masthead .eyebrow{font-size:11px;letter-spacing:0.35em;color:var(--gold);text-transform:uppercase;margin-bottom:6px;}
+  .masthead h1{font-family:'Arial Narrow','Helvetica Neue Condensed',Impact,sans-serif;font-weight:800;font-size:clamp(32px,9vw,52px);margin:0;line-height:0.95;}
+  .masthead h1 span{color:var(--gold-bright);}
+  .masthead .sub{margin-top:8px;font-size:13px;color:var(--chalk-dim);}
+
+  /* ---- Scoreboard ---- */
+  .scoreboard{max-width:720px;margin:18px auto 0;padding:14px 18px;background:var(--card);border:1px solid var(--card-line);border-radius:10px;}
+  .scoreboard-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .scoreboard .count{font-family:'Arial Narrow',Impact,sans-serif;font-weight:800;font-size:30px;color:var(--gold-bright);}
+  .scoreboard .count small{font-size:15px;color:var(--chalk-dim);font-weight:400;}
+  .scoreboard .pct{font-size:14px;color:var(--chalk-dim);}
+  .bar-track{margin-top:10px;height:14px;border-radius:7px;background:var(--bare);overflow:hidden;border:1px solid rgba(0,0,0,0.25);}
+  .bar-fill{height:100%;background:linear-gradient(90deg,#3d7a3f,var(--gold));width:0%;transition:width 0.4s ease;}
+  .league-chips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;}
+  .chip{font-size:11px;color:var(--chalk-dim);}
+  .chip b{display:block;font-family:'Arial Narrow',Impact,sans-serif;font-size:16px;color:var(--chalk);font-weight:800;}
+  .chip .mini{height:4px;border-radius:2px;background:var(--bare);margin-top:4px;overflow:hidden;}
+  .chip .mini i{display:block;height:100%;background:var(--gold);}
+  .score-actions{display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:10px;}
+  .share-btn{
+    background:var(--gold);color:#10301d;border:none;border-radius:8px;padding:9px 16px;
+    font-family:'Arial Narrow',Impact,sans-serif;font-weight:800;font-size:14px;letter-spacing:0.04em;text-transform:uppercase;cursor:pointer;
+  }
+  .share-btn:hover{filter:brightness(1.08);}
+  .reset-link{font-size:11px;color:var(--chalk-dim);text-decoration:underline;cursor:pointer;background:none;border:none;padding:4px 0;}
+  .reset-link:hover{color:var(--gold);}
+  .reset-link.armed{color:var(--wales-red);font-weight:700;}
+
+  /* ---- Tabs ---- */
+  .tabs{max-width:720px;margin:18px auto 0;display:flex;gap:8px;padding:0 4px;}
+  .tab-btn{flex:1;padding:10px 12px;background:var(--card);border:1px solid var(--card-line);border-bottom:3px solid transparent;color:var(--chalk-dim);font-family:'Arial Narrow',Impact,sans-serif;font-weight:800;letter-spacing:0.05em;text-transform:uppercase;font-size:14px;cursor:pointer;border-radius:8px 8px 0 0;}
+  .tab-btn.active{color:var(--chalk);border-bottom:3px solid var(--gold);}
+  .panel{max-width:720px;margin:0 auto;padding:0 4px;}
+
+  /* ---- Search / leagues ---- */
+  .search-wrap{margin:14px 0;}
+  .search-wrap input{width:100%;padding:10px 12px;background:var(--card);border:1px solid var(--card-line);border-radius:8px;color:var(--chalk);font-size:14px;}
+  .search-wrap input::placeholder{color:var(--chalk-dim);}
+  .league{margin-bottom:16px;border:1px solid var(--card-line);border-radius:10px;overflow:hidden;background:var(--card);}
+  .league-head{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:linear-gradient(90deg, rgba(232,180,58,0.14), transparent);}
+  .league-head h2{font-family:'Arial Narrow',Impact,sans-serif;font-size:16px;letter-spacing:0.04em;text-transform:uppercase;margin:0;color:var(--gold-bright);}
+  .league-head .tally{font-size:12px;color:var(--chalk-dim);}
+  .league-body{border-top:1px solid var(--card-line);}
+  .club-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--card-line);}
+  .club-row:last-child{border-bottom:none;}
+  .club-row.ticked{background:rgba(232,180,58,0.08);}
+  .club-info{flex:1;min-width:0;}
+  .ticks{display:grid;grid-template-columns:repeat(3,34px);gap:2px;flex:none;}
+  .ticks label{display:flex;justify-content:center;align-items:center;height:30px;cursor:pointer;border-radius:6px;}
+  .ticks label:hover{background:rgba(232,180,58,0.1);}
+  .ticks input{width:19px;height:19px;accent-color:var(--gold);cursor:pointer;margin:0;}
+  .tick-head{display:grid;grid-template-columns:1fr repeat(3,34px);gap:2px;padding:6px 14px 4px;font-size:9.5px;letter-spacing:0.04em;text-transform:uppercase;color:var(--chalk-dim);border-top:1px solid var(--card-line);}
+  .tick-head span{text-align:center;line-height:1.1;}
+  .tick-head span:first-child{text-align:left;}
+  .tick-key{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--chalk-dim);margin:0 2px 12px;}
+  .tick-key b{color:var(--chalk);font-weight:700;}
+  .club-name{font-weight:700;font-size:14.5px;}
+  .club-name.done{color:var(--gold-bright);}
+  .club-stadium{font-size:12.5px;color:var(--chalk-dim);margin-top:1px;}
+  .club-county{font-size:10px;color:var(--chalk-dim);opacity:0.8;text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap;}
+
+  /* ---- Map ---- */
+  .map-intro{font-size:12.5px;color:var(--chalk-dim);margin:14px 2px 10px;line-height:1.5;}
+  .map-frame{position:relative;background:var(--sea);border:1px solid var(--card-line);border-radius:10px;overflow:hidden;touch-action:none;}
+  .map-frame svg{display:block;width:100%;height:auto;aspect-ratio:530/690;cursor:grab;user-select:none;}
+  .map-frame svg.dragging{cursor:grabbing;}
+  .county{stroke:var(--land-line);stroke-width:0.7;stroke-linejoin:round;transition:fill 0.3s ease;}
+  .county.empty{fill:var(--land-empty);}
+  .county.has-clubs{cursor:pointer;}
+  .county.has-clubs:hover{filter:brightness(1.12);}
+  .county.wales{stroke:var(--wales-red);stroke-dasharray:3 2;stroke-width:1;}
+  .county.selected{stroke:var(--gold-bright);stroke-width:2.2;stroke-dasharray:none;}
+  .scotland{fill:var(--scotland);stroke:var(--land-line);stroke-width:0.7;}
+  .lbl{pointer-events:none;text-anchor:middle;font-family:'Helvetica Neue',Arial,sans-serif;paint-order:stroke;stroke-linejoin:round;}
+  .lbl .nm{font-size:6px;font-weight:600;}
+  .lbl .ct{font-size:8px;font-weight:800;}
+  .lbl.empty{fill:var(--chalk-dim);opacity:0.75;}
+  .lbl.empty .nm{font-size:5.2px;font-weight:400;}
+  svg.compact .lbl .nm{display:none;}
+  svg.compact .lbl.empty{display:none;}
+  svg.compact .lbl .ct{font-size:11px;}
+  .country-lbl{font-family:'Arial Narrow',Impact,sans-serif;font-size:13px;font-weight:800;letter-spacing:0.15em;fill:var(--chalk-dim);opacity:0.55;text-anchor:middle;pointer-events:none;}
+  .zoom-ctrl{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:6px;}
+  .zoom-ctrl button{width:34px;height:34px;border-radius:8px;border:1px solid var(--card-line);background:var(--card);color:var(--chalk);font-size:18px;font-weight:700;cursor:pointer;line-height:1;}
+  .zoom-ctrl button.txt{font-size:10px;}
+  .legend{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;margin:12px auto 0;font-size:11px;color:var(--chalk-dim);justify-content:center;}
+  .legend span{display:inline-flex;align-items:center;gap:5px;}
+  .legend .swatch{width:14px;height:14px;border-radius:3px;border:1px solid var(--card-line);}
+  .county-detail{margin:16px auto 0;background:var(--card);border:1px solid var(--card-line);border-radius:10px;padding:14px 16px;}
+  .county-detail h3{font-family:'Arial Narrow',Impact,sans-serif;margin:0 0 4px;font-size:17px;color:var(--gold-bright);text-transform:uppercase;}
+  .county-detail .cd-sub{font-size:12px;color:var(--chalk-dim);margin-bottom:10px;}
+  .cd-club{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--card-line);}
+  .cd-club:last-child{border-bottom:none;}
+  .cd-club > div:first-child{flex:1;min-width:0;}
+  .cd-club .n{font-size:13px;}
+  .cd-club .n.done{color:var(--gold-bright);}
+  .cd-club .s{font-size:11.5px;color:var(--chalk-dim);}
+  .footer-note{text-align:center;font-size:11px;color:var(--chalk-dim);opacity:0.7;margin-top:30px;}
+
+  /* ---- Share sheet ---- */
+  .sheet-scrim{position:fixed;inset:0;background:var(--scrim);display:none;align-items:flex-end;justify-content:center;z-index:50;padding:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));padding-top:calc(12px + env(safe-area-inset-top,0px));}
+  .sheet-scrim.open{display:flex;}
+  @media (min-width:640px){.sheet-scrim{align-items:center;}}
+  .sheet{background:var(--card);color:var(--chalk);border:1px solid var(--card-line);border-radius:14px;width:100%;max-width:560px;max-height:100%;overflow:auto;padding:18px;}
+  .sheet-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+  .sheet h2{font-family:'Arial Narrow',Impact,sans-serif;text-transform:uppercase;margin:0;font-size:22px;}
+  .sheet .verdict{font-size:13px;color:var(--chalk-dim);margin-top:2px;}
+  .close-btn{background:none;border:1px solid var(--card-line);color:var(--chalk);border-radius:8px;width:32px;height:32px;font-size:18px;cursor:pointer;flex:none;}
+  .sum-big{display:flex;align-items:baseline;gap:10px;margin:14px 0 4px;}
+  .sum-big .n{font-family:'Arial Narrow',Impact,sans-serif;font-weight:800;font-size:56px;line-height:1;color:var(--gold-bright);}
+  .sum-big .of{font-size:15px;color:var(--chalk-dim);}
+  .sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;margin:14px 0;}
+  .sum-item{font-size:12px;color:var(--chalk-dim);}
+  .sum-item strong{display:block;font-size:14px;color:var(--chalk);font-weight:700;margin-bottom:2px;}
+  .sum-leagues{margin:10px 0;}
+  .sl-row{display:grid;grid-template-columns:110px 1fr 44px;align-items:center;gap:10px;font-size:12.5px;padding:3px 0;}
+  .sl-row .t{height:8px;border-radius:4px;background:var(--bare);overflow:hidden;}
+  .sl-row .t i{display:block;height:100%;background:linear-gradient(90deg,#3d7a3f,var(--gold));}
+  .sl-row .v{text-align:right;color:var(--chalk-dim);font-variant-numeric:tabular-nums;}
+  .share-img{width:100%;border-radius:10px;border:1px solid var(--card-line);display:block;margin-top:12px;}
+  .share-text{width:100%;min-height:118px;margin-top:12px;background:transparent;color:var(--chalk);border:1px solid var(--card-line);border-radius:8px;padding:10px;font:13px/1.45 'Helvetica Neue',Arial,sans-serif;resize:vertical;}
+  .sheet-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+  .sheet-actions button{flex:1 1 140px;padding:10px 12px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;border:1px solid var(--card-line);background:transparent;color:var(--chalk);}
+  .sheet-actions button.primary{background:var(--gold);color:#10301d;border-color:transparent;}
+  .toast{min-height:18px;font-size:12px;color:var(--gold-bright);margin-top:8px;}
+  @media (max-width:480px){
+    .league-chips{grid-template-columns:repeat(2,1fr);}
+    .ticks{grid-template-columns:repeat(3,30px);}
+    .tick-head{grid-template-columns:1fr repeat(3,30px);}
+    .club-county{display:none;}
+    .sum-big .n{font-size:46px;}
+    .sl-row{grid-template-columns:96px 1fr 40px;}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;}}
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="eyebrow">2026–27 Season · English Football League Pyramid</div>
+  <h1>THE COMPLETE <span>92</span></h1>
+  <div class="sub">Every ground. Every county. Tick them off as you go.</div>
+</div>
+
+<div class="scoreboard">
+  <div class="scoreboard-row">
+    <div class="count"><span id="tickedCount">0</span><small> / 92 grounds</small></div>
+    <div class="pct" id="pctText">0% complete</div>
+  </div>
+  <div class="bar-track"><div class="bar-fill" id="barFill"></div></div>
+  <div class="league-chips" id="leagueChips"></div>
+  <div class="score-actions">
+    <button class="reset-link" id="resetBtn">Clear all ticks</button>
+    <button class="share-btn" id="openShare">Share my total</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="checklist">Checklist</button>
+  <button class="tab-btn" data-tab="map">Ground Map</button>
+</div>
+
+<div class="panel" id="checklistPanel">
+  <div class="search-wrap">
+    <input type="text" id="searchBox" placeholder="Search a club, stadium or county…" />
+  </div>
+  <div class="tick-key">Tick what you went to: <span><b>M</b> men’s game</span><span><b>E</b> concert or event</span><span><b>W</b> women’s game or other</span></div>
+  <div id="leagueContainer"></div>
+</div>
+
+<div class="panel" id="mapPanel" style="display:none;">
+  <div class="map-intro">Ceremonial counties of England, with Wales shown as one area for its four League clubs. A ground counts as visited once any of its three boxes is ticked, and each county is shaded by how many of its grounds you’ve been to. Tap a county to see its grounds; pinch, scroll or use the buttons to zoom.</div>
+  <div class="map-frame" id="mapFrame">
+    <svg id="mapSvg" viewBox="0 0 530 690" role="img" aria-label="Map of England and Wales coloured by grounds visited"></svg>
+    <div class="zoom-ctrl">
+      <button id="zoomIn" aria-label="Zoom in">+</button>
+      <button id="zoomOut" aria-label="Zoom out">−</button>
+      <button id="zoomReset" class="txt" aria-label="Reset zoom">Fit</button>
+    </div>
+  </div>
+  <div class="legend">
+    <span><span class="swatch" style="background:var(--land-empty)"></span> No League ground</span>
+    <span><span class="swatch" id="sw0"></span> 0%</span>
+    <span><span class="swatch" style="background:#2f5b34"></span> 50%</span>
+    <span><span class="swatch" style="background:#e8b43a"></span> 100%</span>
+  </div>
+  <div id="countyDetail"></div>
+</div>
+
+<div class="footer-note">Your ticks are saved on this device.</div>
+
+<div class="sheet-scrim" id="shareScrim" aria-hidden="true">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="sheet-head">
+      <div>
+        <h2 id="sheetTitle">Your 92 so far</h2>
+        <div class="verdict" id="sumVerdict"></div>
+      </div>
+      <button class="close-btn" id="closeShare" aria-label="Close">×</button>
+    </div>
+    <div class="sum-big"><span class="n" id="sumN">0</span><span class="of" id="sumOf">of 92 grounds</span></div>
+    <div class="bar-track"><div class="bar-fill" id="sumBar"></div></div>
+    <div class="sum-leagues" id="sumLeagues"></div>
+    <div class="sum-grid" id="sumGrid"></div>
+    <img class="share-img" id="shareImg" alt="Share card showing your total and map" />
+    <textarea class="share-text" id="shareText" aria-label="Share text"></textarea>
+    <div class="sheet-actions">
+      <button class="primary" id="doShare">Share</button>
+      <button id="doCopy">Copy text</button>
+      <button id="doSave">Save image</button>
+    </div>
+    <div class="toast" id="toast" role="status"></div>
+  </div>
+</div>
+
+<script>
+// ---------------- DATA ----------------
+const CLUBS = [
+// Premier League
+{n:"Arsenal", s:"Emirates Stadium", l:"Premier League", c:"Greater London"},
+{n:"Aston Villa", s:"Villa Park", l:"Premier League", c:"West Midlands"},
+{n:"Bournemouth", s:"Vitality Stadium", l:"Premier League", c:"Dorset"},
+{n:"Brentford", s:"Gtech Community Stadium", l:"Premier League", c:"Greater London"},
+{n:"Brighton & Hove Albion", s:"Falmer Stadium (Amex)", l:"Premier League", c:"East Sussex"},
+{n:"Chelsea", s:"Stamford Bridge", l:"Premier League", c:"Greater London"},
+{n:"Coventry City", s:"Coventry Building Society Arena", l:"Premier League", c:"West Midlands"},
+{n:"Crystal Palace", s:"Selhurst Park", l:"Premier League", c:"Greater London"},
+{n:"Everton", s:"Everton Stadium (Bramley-Moore Dock)", l:"Premier League", c:"Merseyside"},
+{n:"Fulham", s:"Craven Cottage", l:"Premier League", c:"Greater London"},
+{n:"Hull City", s:"MKM Stadium", l:"Premier League", c:"East Riding of Yorkshire"},
+{n:"Ipswich Town", s:"Portman Road", l:"Premier League", c:"Suffolk"},
+{n:"Leeds United", s:"Elland Road", l:"Premier League", c:"West Yorkshire"},
+{n:"Liverpool", s:"Anfield", l:"Premier League", c:"Merseyside"},
+{n:"Manchester City", s:"Etihad Stadium", l:"Premier League", c:"Greater Manchester"},
+{n:"Manchester United", s:"Old Trafford", l:"Premier League", c:"Greater Manchester"},
+{n:"Newcastle United", s:"St James' Park", l:"Premier League", c:"Tyne and Wear"},
+{n:"Nottingham Forest", s:"City Ground", l:"Premier League", c:"Nottinghamshire"},
+{n:"Sunderland", s:"Stadium of Light", l:"Premier League", c:"Tyne and Wear"},
+{n:"Tottenham Hotspur", s:"Tottenham Hotspur Stadium", l:"Premier League", c:"Greater London"},
+// Championship
+{n:"Birmingham City", s:"St Andrew's @ Knighthead Park", l:"Championship", c:"West Midlands"},
+{n:"Blackburn Rovers", s:"Ewood Park", l:"Championship", c:"Lancashire"},
+{n:"Bolton Wanderers", s:"University of Bolton Stadium", l:"Championship", c:"Greater Manchester"},
+{n:"Bristol City", s:"Ashton Gate", l:"Championship", c:"Bristol"},
+{n:"Burnley", s:"Turf Moor", l:"Championship", c:"Lancashire"},
+{n:"Cardiff City", s:"Cardiff City Stadium", l:"Championship", c:"Wales"},
+{n:"Charlton Athletic", s:"The Valley", l:"Championship", c:"Greater London"},
+{n:"Derby County", s:"Pride Park Stadium", l:"Championship", c:"Derbyshire"},
+{n:"Lincoln City", s:"Sincil Bank", l:"Championship", c:"Lincolnshire"},
+{n:"Middlesbrough", s:"Riverside Stadium", l:"Championship", c:"North Yorkshire"},
+{n:"Millwall", s:"The Den", l:"Championship", c:"Greater London"},
+{n:"Norwich City", s:"Carrow Road", l:"Championship", c:"Norfolk"},
+{n:"Portsmouth", s:"Fratton Park", l:"Championship", c:"Hampshire"},
+{n:"Preston North End", s:"Deepdale", l:"Championship", c:"Lancashire"},
+{n:"Queens Park Rangers", s:"Loftus Road", l:"Championship", c:"Greater London"},
+{n:"Sheffield United", s:"Bramall Lane", l:"Championship", c:"South Yorkshire"},
+{n:"Southampton", s:"St Mary's Stadium", l:"Championship", c:"Hampshire"},
+{n:"Stoke City", s:"bet365 Stadium", l:"Championship", c:"Staffordshire"},
+{n:"Swansea City", s:"Swansea.com Stadium", l:"Championship", c:"Wales"},
+{n:"Watford", s:"Vicarage Road", l:"Championship", c:"Hertfordshire"},
+{n:"West Bromwich Albion", s:"The Hawthorns", l:"Championship", c:"West Midlands"},
+{n:"West Ham United", s:"London Stadium", l:"Championship", c:"Greater London"},
+{n:"Wolverhampton Wanderers", s:"Molineux Stadium", l:"Championship", c:"West Midlands"},
+{n:"Wrexham", s:"Racecourse Ground", l:"Championship", c:"Wales"},
+// League One
+{n:"AFC Wimbledon", s:"Plough Lane", l:"League One", c:"Greater London"},
+{n:"Barnsley", s:"Oakwell", l:"League One", c:"South Yorkshire"},
+{n:"Blackpool", s:"Bloomfield Road", l:"League One", c:"Lancashire"},
+{n:"Bradford City", s:"Valley Parade", l:"League One", c:"West Yorkshire"},
+{n:"Bromley", s:"Hayes Lane", l:"League One", c:"Greater London"},
+{n:"Burton Albion", s:"Pirelli Stadium", l:"League One", c:"Staffordshire"},
+{n:"Cambridge United", s:"Abbey Stadium", l:"League One", c:"Cambridgeshire"},
+{n:"Doncaster Rovers", s:"Eco-Power Stadium", l:"League One", c:"South Yorkshire"},
+{n:"Huddersfield Town", s:"John Smith's Stadium", l:"League One", c:"West Yorkshire"},
+{n:"Leicester City", s:"King Power Stadium", l:"League One", c:"Leicestershire"},
+{n:"Leyton Orient", s:"Brisbane Road", l:"League One", c:"Greater London"},
+{n:"Luton Town", s:"Kenilworth Road", l:"League One", c:"Bedfordshire"},
+{n:"Mansfield Town", s:"One Call Stadium", l:"League One", c:"Nottinghamshire"},
+{n:"Milton Keynes Dons", s:"Stadium MK", l:"League One", c:"Buckinghamshire"},
+{n:"Notts County", s:"Meadow Lane", l:"League One", c:"Nottinghamshire"},
+{n:"Oxford United", s:"Kassam Stadium", l:"League One", c:"Oxfordshire"},
+{n:"Peterborough United", s:"Weston Homes Stadium", l:"League One", c:"Cambridgeshire"},
+{n:"Plymouth Argyle", s:"Home Park", l:"League One", c:"Devon"},
+{n:"Reading", s:"Select Car Leasing Stadium", l:"League One", c:"Berkshire"},
+{n:"Sheffield Wednesday", s:"Hillsborough Stadium", l:"League One", c:"South Yorkshire"},
+{n:"Stevenage", s:"Lamex Stadium", l:"League One", c:"Hertfordshire"},
+{n:"Stockport County", s:"Edgeley Park", l:"League One", c:"Greater Manchester"},
+{n:"Wigan Athletic", s:"Brick Community Stadium", l:"League One", c:"Greater Manchester"},
+{n:"Wycombe Wanderers", s:"Adams Park", l:"League One", c:"Buckinghamshire"},
+// League Two
+{n:"Accrington Stanley", s:"Wham Stadium", l:"League Two", c:"Lancashire"},
+{n:"Barnet", s:"The Hive Stadium", l:"League Two", c:"Greater London"},
+{n:"Bristol Rovers", s:"Memorial Stadium", l:"League Two", c:"Bristol"},
+{n:"Cheltenham Town", s:"Whaddon Road", l:"League Two", c:"Gloucestershire"},
+{n:"Chesterfield", s:"SMH Group Stadium", l:"League Two", c:"Derbyshire"},
+{n:"Colchester United", s:"JobServe Community Stadium", l:"League Two", c:"Essex"},
+{n:"Crawley Town", s:"Broadfield Stadium", l:"League Two", c:"West Sussex"},
+{n:"Crewe Alexandra", s:"Gresty Road", l:"League Two", c:"Cheshire"},
+{n:"Exeter City", s:"St James Park", l:"League Two", c:"Devon"},
+{n:"Fleetwood Town", s:"Highbury Stadium", l:"League Two", c:"Lancashire"},
+{n:"Gillingham", s:"Priestfield Stadium", l:"League Two", c:"Kent"},
+{n:"Grimsby Town", s:"Blundell Park", l:"League Two", c:"Lincolnshire"},
+{n:"Newport County", s:"Rodney Parade", l:"League Two", c:"Wales"},
+{n:"Northampton Town", s:"Sixfields Stadium", l:"League Two", c:"Northamptonshire"},
+{n:"Oldham Athletic", s:"Boundary Park", l:"League Two", c:"Greater Manchester"},
+{n:"Port Vale", s:"Vale Park", l:"League Two", c:"Staffordshire"},
+{n:"Rochdale", s:"Crown Oil Arena", l:"League Two", c:"Greater Manchester"},
+{n:"Rotherham United", s:"New York Stadium", l:"League Two", c:"South Yorkshire"},
+{n:"Salford City", s:"Peninsula Stadium", l:"League Two", c:"Greater Manchester"},
+{n:"Shrewsbury Town", s:"Croud Meadow", l:"League Two", c:"Shropshire"},
+{n:"Swindon Town", s:"County Ground", l:"League Two", c:"Wiltshire"},
+{n:"Tranmere Rovers", s:"Prenton Park", l:"League Two", c:"Merseyside"},
+{n:"Walsall", s:"MacRail Stadium", l:"League Two", c:"West Midlands"},
+{n:"York City", s:"LNER Community Stadium", l:"League Two", c:"North Yorkshire"},
+];
+CLUBS.forEach(c=>{ c.id = c.n.toLowerCase().replace(/[^a-z0-9]+/g,'-'); });
+
+const GEO = {"Bedfordshire":{"d":"M359.4,465.8L363.1,458.7L362.0,455.7L363.2,454.4L362.7,453.6L363.4,452.9L363.2,451.5L361.4,450.2L366.5,443.2L365.4,440.7L363.5,440.1L363.1,438.6L363.8,438.3L363.9,435.4L361.1,434.0L363.2,430.3L362.0,425.8L365.4,424.6L368.0,427.3L369.6,427.0L370.3,425.4L369.5,423.2L371.4,420.5L371.0,420.1L374.7,419.5L376.7,420.4L376.8,422.3L377.7,423.6L381.0,424.1L381.2,424.8L380.5,425.2L381.1,429.3L383.3,429.5L383.2,428.3L383.8,428.2L387.2,428.7L386.5,431.7L388.9,431.7L390.4,433.9L389.1,435.4L392.1,437.3L391.0,438.9L395.2,439.4L396.4,438.8L397.1,439.5L396.3,445.9L395.4,448.2L393.8,448.0L392.2,450.9L393.6,453.9L390.7,455.1L390.4,456.7L388.9,457.4L388.0,455.0L387.1,454.9L386.0,457.2L382.4,457.1L383.5,458.4L383.5,459.9L381.8,461.1L381.2,460.6L381.4,457.8L380.6,457.9L379.7,462.8L383.7,468.7L384.5,471.9L382.9,472.8L382.2,474.2L378.8,472.0L377.0,472.3L375.4,471.5L374.9,471.8L375.4,472.6L373.3,473.6L372.7,474.8L373.3,476.0L372.2,477.1L369.8,474.8L370.5,475.0L370.8,474.2L367.6,470.0L365.1,468.3L362.9,468.2L361.4,466.6L360.0,466.8Z","lp":[377.6,449.2]},"Berkshire":{"d":"M299.1,512.7L299.1,507.9L300.9,506.1L302.6,506.9L303.9,506.3L306.8,508.7L307.2,507.7L308.4,507.9L309.9,506.9L310.2,507.9L311.4,506.7L312.8,507.4L314.0,506.1L315.7,507.0L316.6,504.8L321.4,507.6L325.3,507.6L325.3,508.6L329.7,507.0L329.6,509.9L331.7,510.7L332.4,512.9L333.4,513.3L336.0,512.6L337.0,514.4L338.6,515.4L339.6,513.4L342.5,512.4L343.6,514.4L342.7,515.4L343.1,516.1L345.0,515.1L346.9,511.9L348.5,511.1L347.9,508.9L346.4,507.5L347.8,504.6L350.4,506.5L353.8,505.7L355.0,504.0L356.3,504.2L358.9,502.7L359.4,504.1L360.4,504.0L360.8,505.0L360.1,510.1L363.6,512.8L364.9,512.0L363.1,510.7L363.1,508.1L365.1,506.9L367.9,508.6L369.5,507.5L368.9,507.9L369.4,509.8L372.3,510.0L372.1,511.8L374.9,511.6L373.6,514.5L372.6,514.3L371.5,515.8L372.8,518.3L369.3,516.6L367.8,517.7L366.4,524.1L362.8,524.1L358.2,526.3L355.4,530.1L351.1,527.8L348.2,527.9L345.0,526.5L336.2,527.5L333.6,524.6L331.7,525.7L331.7,527.3L330.1,527.6L327.4,527.7L322.2,526.1L315.4,526.7L311.1,526.1L309.9,527.9L308.8,528.1L309.8,530.1L305.1,531.0L305.9,528.9L304.9,528.0L305.2,526.5L301.0,523.6L301.2,522.0L299.9,521.4L300.3,520.7L303.0,520.4L303.2,517.8Z","lp":[335.6,517.1]},"Bristol":{"d":"M220.3,510.9L223.4,506.9L224.8,510.4L229.8,510.0L229.3,511.8L231.8,512.8L234.3,512.7L234.5,516.2L233.8,517.5L232.7,518.0L234.6,519.9L233.5,519.3L232.8,521.9L231.1,521.8L230.4,523.1L226.0,522.6L226.3,518.9L225.6,518.5L226.6,517.6L226.0,515.6L224.2,513.4L222.6,514.0Z","lp":[229.9,514.8]},"Buckinghamshire":{"d":"M329.3,474.5L330.6,473.3L333.6,475.1L335.6,473.9L334.7,473.4L334.5,470.7L333.6,469.8L334.1,468.6L332.5,467.9L333.4,465.3L332.9,464.7L334.9,462.0L333.4,462.4L332.3,460.8L335.1,455.8L329.3,453.7L330.3,451.1L334.4,449.1L336.6,449.0L335.7,447.9L340.8,448.1L341.9,446.9L345.2,453.5L346.2,452.4L347.1,452.5L348.8,450.2L348.1,449.1L349.6,448.8L350.2,447.8L349.1,445.7L347.5,444.8L347.4,443.5L346.3,443.2L346.7,441.9L350.3,441.1L350.0,439.9L351.2,440.0L351.7,438.4L352.7,438.9L353.7,437.0L355.6,437.2L358.6,434.4L361.1,434.0L363.9,435.4L363.8,438.4L363.1,438.7L363.5,440.1L365.4,440.7L366.5,443.2L361.4,450.2L363.2,451.5L363.4,452.9L362.7,453.6L363.2,454.4L362.0,455.7L363.1,458.7L359.4,465.8L360.0,466.8L361.4,466.6L362.9,468.2L365.1,468.3L367.6,470.0L370.9,474.2L370.5,475.0L369.3,474.5L367.9,477.0L364.3,475.6L362.0,476.1L360.0,473.4L360.5,472.5L359.9,471.5L358.4,471.6L356.5,473.4L358.0,475.9L359.1,475.7L360.7,477.9L360.4,478.8L361.9,481.6L365.8,483.7L367.7,483.1L368.5,484.8L370.0,485.1L370.2,486.3L369.4,487.6L370.7,489.2L370.5,490.8L372.1,490.8L373.5,491.8L372.4,492.4L372.3,493.5L371.3,493.3L371.2,495.7L372.5,499.7L373.9,500.0L375.7,504.4L374.4,506.7L375.4,510.2L374.9,511.6L372.0,511.8L372.3,510.0L369.4,509.9L368.9,507.9L367.9,508.6L365.1,506.9L363.1,508.1L363.2,510.7L364.9,512.1L363.7,512.9L360.1,510.1L360.8,505.0L360.4,504.1L359.4,504.1L358.9,502.7L356.2,504.2L355.0,504.0L353.8,505.7L350.3,506.5L347.7,504.6L346.6,506.5L346.2,505.3L343.7,503.7L343.4,502.1L345.0,500.5L343.3,499.9L343.6,498.5L342.8,497.2L343.8,496.3L342.7,494.8L344.3,494.7L343.9,493.2L344.9,492.4L347.4,492.7L346.3,491.9L347.5,491.4L346.5,490.1L346.9,487.1L344.4,484.0L342.3,482.9L340.5,482.6L340.1,483.6L337.1,483.0L337.0,484.4L336.0,484.5L333.5,483.2L333.3,480.5L331.7,480.4L330.5,479.0L330.4,477.5L331.4,476.4Z","lp":[345.6,473.4]},"Cambridgeshire":{"d":"M372.0,384.2L374.8,382.6L378.0,383.2L381.7,381.6L382.7,380.1L385.8,380.6L387.8,382.6L391.0,380.8L392.3,382.3L393.2,381.5L395.9,382.4L398.4,380.0L399.4,380.6L401.0,379.6L403.3,381.1L406.8,380.6L408.6,378.7L408.2,375.1L409.5,373.6L411.2,374.0L414.1,372.1L416.7,372.2L415.7,378.4L417.8,378.9L417.8,381.3L416.9,382.0L420.3,385.0L418.5,387.6L420.4,390.5L419.6,391.3L420.4,391.8L419.6,392.5L419.6,393.2L420.3,393.1L419.6,393.6L419.9,395.2L421.4,395.4L419.9,396.4L422.5,398.5L423.2,397.6L426.8,396.9L430.8,398.1L431.8,400.5L435.1,403.2L435.2,405.2L431.6,408.3L434.0,413.5L436.5,414.9L435.3,417.1L435.8,418.5L437.6,418.5L440.9,421.9L440.6,423.2L435.6,425.3L432.6,421.2L431.0,420.8L430.8,422.8L429.8,424.1L431.3,426.1L430.1,427.0L432.0,428.6L435.4,427.1L434.9,426.2L435.8,425.5L439.5,427.7L440.4,426.9L441.8,428.3L440.5,435.2L439.1,435.5L437.8,434.4L436.7,436.0L435.5,436.0L435.6,438.9L433.7,440.7L433.2,442.4L434.2,443.1L434.9,446.5L433.3,448.3L434.0,449.7L431.0,448.4L429.4,445.9L426.7,444.0L426.0,443.8L424.4,445.6L423.2,444.2L421.1,443.9L419.7,446.1L420.2,447.5L418.7,448.2L418.7,448.9L417.6,448.4L416.0,449.1L415.4,447.7L414.5,447.7L413.7,452.0L412.1,453.8L410.0,448.6L407.5,449.0L405.9,447.6L398.6,452.5L398.1,449.7L396.6,449.0L397.1,439.5L396.4,438.8L395.2,439.4L390.9,438.9L392.0,437.3L389.0,435.4L390.3,433.9L388.9,431.8L386.5,431.7L387.1,428.7L383.8,428.2L383.2,428.3L383.4,429.5L381.1,429.3L380.5,425.1L381.1,424.8L381.0,424.1L377.8,423.6L376.8,422.3L376.7,420.4L374.7,419.5L374.6,417.7L373.4,417.5L373.8,416.6L372.3,415.4L373.0,413.8L372.5,413.2L376.2,412.5L377.8,409.5L381.4,407.0L380.9,406.3L382.7,403.3L381.5,400.7L381.8,398.9L377.7,396.8L378.5,395.4L377.2,393.1L378.0,392.5L377.5,391.0L373.2,391.6L372.2,390.7L373.6,386.1Z","lp":[404.0,412.9]},"Cheshire":{"d":"M195.2,312.5L196.6,312.0L196.2,311.6L198.5,309.5L201.7,311.6L203.9,310.6L205.6,311.3L207.5,310.3L210.1,312.1L213.1,312.8L214.1,311.7L213.7,310.8L215.7,310.9L217.5,312.1L219.9,310.0L219.3,308.5L219.9,306.8L222.2,306.7L223.6,305.3L224.9,305.4L223.9,304.8L221.2,306.3L219.4,305.6L217.6,309.1L214.7,307.4L215.6,307.1L215.6,306.2L217.7,305.3L218.4,302.6L219.7,302.6L220.6,300.3L222.5,300.6L222.7,301.6L224.1,302.2L225.1,301.9L226.0,297.4L225.2,296.9L225.6,296.1L224.8,296.2L225.1,294.7L227.6,295.6L228.4,296.7L230.5,295.9L230.3,295.0L231.2,296.1L232.2,294.1L233.6,293.8L233.4,293.1L237.2,291.6L237.6,293.9L240.2,298.9L238.4,301.1L241.7,302.1L245.5,304.7L247.5,304.3L250.3,306.4L250.1,307.2L253.0,305.1L254.1,305.2L257.8,306.0L258.0,307.0L257.3,307.6L259.4,308.8L260.5,307.1L260.0,306.5L260.8,304.4L261.9,305.0L263.8,304.5L265.5,305.5L267.4,303.6L268.0,304.1L269.6,305.8L269.5,316.3L271.8,319.6L270.8,320.4L270.0,323.8L267.0,323.8L265.4,326.2L262.6,326.5L260.7,324.9L260.6,327.8L259.7,327.5L253.5,335.2L253.1,334.8L250.4,336.5L248.8,336.2L246.8,339.0L244.5,339.4L244.3,342.3L245.2,343.6L244.4,344.3L244.5,345.4L240.8,346.7L240.9,348.6L237.8,349.7L235.1,348.0L234.5,351.0L232.4,349.0L230.7,350.1L230.0,349.2L230.1,347.4L227.6,345.5L224.8,346.6L223.1,345.6L221.3,346.9L219.1,346.5L218.5,345.6L216.2,346.1L214.0,345.2L213.5,343.0L212.3,342.4L212.7,340.8L211.8,339.9L212.5,338.9L211.6,338.4L212.3,338.1L211.0,336.6L211.4,335.8L209.7,334.6L211.0,331.5L209.2,332.3L205.6,330.1L204.6,328.1L203.6,327.6L208.1,325.8L208.5,323.8L201.0,316.8L197.6,316.1L196.2,314.5L197.7,314.4L196.1,313.9L196.5,313.4ZM196.9,313.3L196.8,313.5L197.0,313.3Z","lp":[238.5,322.1]},"Cornwall":{"d":"M4.1,664.6L6.3,662.3L4.9,658.2L7.8,654.0L10.9,653.9L13.1,651.2L13.8,651.7L17.6,648.9L22.0,648.8L22.5,650.9L25.0,651.7L28.0,648.3L28.0,646.6L29.2,646.3L29.9,647.2L33.0,646.5L34.6,644.6L35.7,644.7L39.0,642.0L39.8,638.5L42.3,638.4L43.7,636.2L45.7,635.7L46.5,629.1L49.7,628.4L49.9,627.0L51.5,628.1L53.1,627.1L54.0,625.3L54.2,622.9L54.9,622.5L54.4,621.8L54.8,619.6L54.0,619.1L55.7,618.0L55.9,616.0L55.0,613.4L58.7,614.3L59.6,612.7L61.5,611.5L61.2,612.9L62.8,615.8L62.5,612.0L63.6,610.8L62.3,609.5L63.3,608.9L64.2,609.9L65.8,610.2L67.1,609.5L67.0,608.8L69.6,609.2L72.2,608.7L74.1,606.0L75.1,602.7L74.8,600.8L76.3,600.1L76.9,600.6L77.5,599.3L80.8,598.1L80.8,597.1L82.7,595.9L82.8,593.3L84.2,593.2L85.0,591.8L89.5,588.9L89.9,583.6L90.7,583.5L89.4,575.3L91.2,572.5L97.5,572.7L97.0,574.5L99.7,579.8L98.8,579.9L98.2,581.9L97.7,586.2L94.5,587.8L97.3,588.7L99.2,591.1L100.2,591.3L99.9,590.0L101.3,589.6L102.2,590.5L101.8,593.1L103.4,596.3L102.8,598.1L104.2,599.6L105.0,604.4L105.7,605.4L107.4,605.9L106.7,612.0L109.3,611.7L108.7,613.1L110.0,615.8L109.4,616.6L110.8,616.0L111.9,617.5L113.7,617.3L113.9,620.6L115.1,620.1L115.5,620.6L114.1,621.8L112.6,621.2L112.7,623.6L111.2,624.9L111.9,625.8L112.9,624.7L113.8,628.1L112.2,629.2L111.5,628.5L112.1,629.6L113.1,629.3L112.9,631.6L111.4,632.9L113.5,633.4L113.1,633.7L114.0,635.3L113.0,635.6L113.8,636.6L113.2,637.8L115.6,636.9L115.7,638.2L113.5,639.6L114.3,641.3L112.7,641.2L111.8,641.9L112.1,640.5L111.5,639.5L105.9,636.2L98.7,635.6L96.8,635.9L94.1,638.9L92.4,638.4L89.4,639.8L86.6,638.8L85.1,639.7L84.6,639.1L82.7,639.5L82.3,638.9L83.7,638.3L82.9,637.9L80.2,639.6L79.8,640.6L79.0,639.9L78.7,636.8L73.9,638.5L73.1,639.6L74.1,642.1L73.2,641.9L72.0,642.9L71.5,645.2L71.6,646.1L72.9,646.7L71.5,647.9L71.8,648.8L70.5,649.6L70.5,650.7L69.0,649.4L66.0,648.7L61.9,652.9L60.8,651.8L59.2,652.2L57.8,654.0L57.1,657.8L55.0,659.1L54.5,658.0L55.5,657.8L55.9,656.7L54.1,657.2L54.9,653.6L54.1,654.3L53.5,651.8L54.1,651.8L54.4,649.8L55.3,649.4L55.0,649.0L54.0,649.7L53.8,651.1L53.3,650.9L51.6,652.9L52.0,654.4L51.4,654.3L52.5,655.4L52.1,656.3L48.9,655.6L51.2,657.5L52.3,657.1L52.8,658.5L51.8,658.0L50.3,658.7L50.5,659.5L49.0,660.3L49.8,662.2L48.8,662.9L45.9,663.1L45.8,661.8L45.2,663.2L44.1,663.3L43.8,662.1L43.5,663.0L44.7,664.2L46.9,663.6L48.7,664.4L47.7,665.0L50.1,664.9L49.7,666.7L50.6,666.9L51.2,668.6L50.3,670.5L48.3,671.4L48.6,672.6L47.9,673.8L46.4,673.2L43.2,673.7L41.5,676.9L41.6,678.2L39.9,678.4L39.2,677.1L37.4,676.5L37.5,675.6L35.9,673.3L36.9,671.4L36.5,670.0L35.2,669.1L35.4,667.5L32.9,664.2L31.3,663.3L29.5,663.6L27.6,661.9L24.8,662.5L24.9,661.5L21.1,658.9L17.8,659.2L17.7,660.2L16.3,661.0L17.4,663.1L16.6,665.0L14.0,667.0L11.0,666.9L9.7,668.1L8.9,667.7L6.8,668.5Z","lp":[82.8,625.6]},"Cumbria":{"d":"M164.0,175.8L166.0,173.7L167.9,169.1L169.0,164.7L168.2,160.3L168.7,160.4L172.2,155.9L173.1,153.0L177.6,148.7L177.7,143.8L180.3,136.6L182.4,134.0L184.3,133.0L187.5,135.4L187.5,134.0L189.2,134.1L190.0,133.1L189.8,132.0L188.5,133.2L186.2,131.8L185.9,130.8L187.8,128.5L189.0,128.3L189.0,128.9L191.2,127.3L193.0,127.2L196.2,129.7L198.5,130.4L200.3,130.1L198.4,129.4L198.0,128.4L198.6,128.0L197.9,127.6L199.4,128.0L198.5,127.1L199.1,127.4L198.9,126.9L200.6,126.1L202.0,124.1L203.0,124.0L203.0,121.2L204.5,118.2L202.8,117.0L203.0,116.3L208.9,116.8L210.3,115.7L210.0,114.6L212.8,113.7L213.5,111.8L217.3,108.5L217.5,107.0L220.1,106.7L225.3,103.2L226.2,101.5L227.1,102.9L226.9,105.2L228.2,107.4L231.9,108.7L232.2,110.9L233.8,111.9L234.2,113.3L238.0,112.5L239.1,113.4L237.9,115.7L239.2,118.2L233.5,120.8L233.4,124.0L231.6,125.8L232.0,126.6L233.7,127.2L233.7,129.2L235.2,130.5L233.8,131.6L233.1,134.1L231.3,135.5L233.3,138.9L232.7,139.8L234.2,143.0L236.4,144.2L238.3,143.7L240.5,141.1L242.9,140.1L243.7,138.6L245.1,141.3L247.7,144.1L249.1,144.3L250.0,145.9L249.1,153.1L247.2,156.3L247.4,157.6L249.0,159.3L251.2,160.1L251.5,161.6L249.1,163.7L250.4,167.6L256.5,172.6L257.3,174.7L258.9,174.7L259.8,181.5L257.8,184.0L253.9,183.7L251.1,185.1L250.1,187.3L250.3,189.8L251.2,190.5L250.8,192.0L249.5,192.1L247.7,193.9L246.3,194.3L249.9,197.9L249.1,199.3L249.4,202.0L248.9,202.8L249.6,203.9L248.9,207.1L247.4,207.5L246.5,206.2L245.8,207.2L244.2,207.3L243.7,208.9L240.1,208.7L240.0,207.3L232.5,212.1L229.3,212.1L228.3,211.4L225.7,215.9L222.0,214.9L222.1,213.3L220.0,213.0L218.0,211.7L215.4,214.3L214.1,213.8L213.7,212.3L214.9,210.9L212.2,211.5L211.3,212.5L211.6,213.5L210.8,213.6L211.4,214.0L210.0,215.1L210.8,215.3L209.7,216.9L204.8,216.3L205.5,213.7L204.4,214.4L204.5,213.7L202.3,211.6L202.6,210.1L200.7,212.8L200.8,215.5L197.8,220.2L193.4,224.2L194.8,226.2L193.5,224.6L193.0,225.0L193.3,224.1L192.2,221.9L190.7,222.4L190.3,223.3L188.9,221.1L189.3,216.2L188.5,216.1L188.0,214.8L190.6,213.6L190.3,212.4L190.8,212.6L191.0,210.3L193.0,207.1L192.0,207.9L191.2,205.1L190.0,204.4L190.0,203.4L189.7,204.3L190.4,205.3L190.2,206.6L187.6,209.5L188.3,209.8L188.5,209.3L189.3,210.7L188.3,212.0L186.1,211.3L185.4,212.2L183.9,212.0L177.6,201.4L177.5,195.4L178.3,194.2L176.8,194.8L172.5,187.2ZM186.7,217.4L188.3,216.5L187.4,217.5L188.7,221.1L188.6,223.0L190.2,224.4L189.8,225.3L190.9,226.1L191.2,227.5L192.9,227.2L193.2,227.7L193.3,227.2L193.3,228.1L190.9,228.0L187.2,221.3Z","lp":[209.1,164.2]},"Derbyshire":{"d":"M267.9,303.5L269.8,302.3L270.6,299.1L269.2,299.0L268.4,297.4L271.0,294.6L270.9,291.7L272.5,288.5L273.3,289.2L275.2,288.5L275.0,287.3L276.1,285.4L277.1,285.9L278.5,285.1L280.6,287.4L281.9,287.3L283.6,289.3L283.3,291.7L287.0,293.8L287.4,298.4L289.5,298.8L289.7,300.2L293.1,301.6L292.5,304.4L297.4,306.7L295.9,307.0L294.6,309.5L294.9,310.0L296.1,309.3L296.8,310.5L297.7,309.4L298.1,310.5L299.3,310.0L299.3,311.1L301.0,311.3L303.3,309.8L305.6,309.8L306.4,309.3L306.1,308.3L307.3,307.6L308.7,307.9L309.3,307.1L310.9,307.8L311.0,309.8L314.2,309.9L315.1,308.5L316.8,308.0L317.5,308.7L317.0,310.0L317.9,310.6L320.5,311.4L321.4,310.7L323.2,311.1L323.4,310.3L325.0,311.0L324.8,313.0L325.7,314.0L324.7,314.9L325.1,315.4L323.3,315.9L322.6,317.4L323.4,318.8L322.9,320.8L323.8,324.4L320.9,325.1L319.6,326.7L317.5,326.0L315.3,327.0L315.5,330.5L316.9,333.7L316.4,334.3L316.8,335.2L314.9,336.0L314.0,337.8L314.9,341.6L317.9,348.4L318.4,355.0L320.8,355.8L321.2,358.3L314.2,359.8L313.8,361.4L313.1,361.2L310.9,363.2L311.3,363.7L309.4,367.2L307.6,367.1L307.7,368.2L306.4,368.8L306.8,369.9L306.0,371.1L304.2,371.9L303.5,371.0L300.3,371.5L299.6,372.9L300.8,375.0L300.5,376.3L297.3,378.5L293.4,378.7L293.3,376.2L290.1,375.0L292.6,369.2L296.2,369.5L296.1,368.7L297.8,367.5L297.6,366.4L296.3,365.6L298.0,363.9L295.2,361.4L291.0,360.3L290.3,360.7L290.0,360.1L288.6,360.8L285.1,358.2L281.7,358.1L279.7,353.8L281.6,351.0L281.7,347.8L286.0,345.2L286.3,341.1L284.9,340.2L285.1,338.6L283.9,335.4L284.6,333.8L282.0,330.0L282.6,328.0L279.4,324.3L273.0,321.5L272.6,320.2L270.9,321.5L270.7,320.4L271.7,319.5L269.5,316.3L269.6,305.8Z","lp":[299.8,332.1]},"Devon":{"d":"M91.2,572.5L93.0,562.2L100.0,563.4L102.3,565.6L105.7,566.3L108.5,565.4L114.7,558.2L115.2,559.5L116.6,559.3L116.2,561.4L117.3,560.0L117.4,557.9L119.3,557.3L119.3,556.6L118.4,556.1L117.0,557.0L116.7,558.1L114.8,556.9L114.5,552.3L113.3,551.9L113.6,550.8L111.9,549.4L114.6,549.3L115.5,545.6L114.3,544.4L115.6,544.2L116.3,543.1L118.0,543.5L124.3,541.5L127.7,542.7L128.5,541.7L133.3,541.5L135.6,540.2L138.0,541.1L140.7,540.0L143.5,540.4L145.4,538.8L146.6,539.8L150.0,540.4L149.1,541.5L149.5,546.3L145.2,547.1L141.6,546.5L141.8,550.7L143.8,553.3L149.6,557.3L151.5,557.4L154.7,560.0L158.3,560.4L156.8,564.7L157.6,565.7L162.4,566.2L163.5,565.0L163.5,563.7L164.6,563.3L166.1,562.9L167.7,563.9L170.4,563.3L170.9,564.6L173.3,564.7L173.3,569.3L176.5,568.8L179.2,571.9L181.9,573.4L188.2,572.9L186.6,577.0L189.6,579.1L190.9,578.0L196.1,577.3L195.9,581.1L197.4,582.6L197.2,583.7L201.6,583.3L201.8,585.7L202.9,587.2L202.5,587.8L207.2,589.0L207.6,590.2L202.8,593.1L204.1,594.6L202.8,597.5L203.2,598.6L197.6,600.7L193.7,600.3L192.7,602.1L185.9,602.1L181.2,603.3L178.1,607.8L177.7,606.7L177.7,608.1L174.4,609.2L173.7,610.6L169.4,609.3L170.0,607.9L167.0,601.0L167.2,602.8L166.3,602.0L166.3,604.0L167.5,605.9L167.9,610.9L169.3,609.9L166.2,613.6L166.1,615.3L163.8,617.7L163.7,617.2L163.2,617.4L164.0,618.0L162.6,624.2L165.0,626.3L162.5,627.4L160.7,626.6L159.3,630.7L160.3,633.0L162.1,633.0L162.6,633.7L163.1,633.3L162.6,632.7L164.7,633.4L162.9,635.7L162.1,639.3L160.5,640.3L158.1,639.0L158.8,638.5L158.0,637.3L158.5,636.7L157.1,635.6L157.9,639.2L158.8,640.4L158.2,641.5L155.3,642.4L153.1,645.4L151.8,651.0L153.1,653.0L150.2,652.8L147.3,655.0L146.1,653.6L143.6,652.5L144.5,651.2L146.8,651.1L146.1,650.7L146.5,650.2L145.0,650.7L145.4,649.1L144.2,648.2L143.7,648.8L144.7,650.7L143.7,650.4L142.6,653.9L140.3,653.3L136.9,650.6L137.5,650.2L137.7,648.3L136.0,646.5L136.4,646.0L135.1,645.9L133.5,644.2L131.7,644.2L131.3,642.7L128.3,642.8L124.6,644.1L122.6,642.9L125.1,642.0L119.2,641.2L118.5,636.8L120.0,637.1L120.7,634.4L119.6,636.5L116.8,635.9L116.2,636.8L116.2,635.6L114.9,635.8L114.6,632.9L114.0,632.9L113.6,631.4L114.4,629.4L116.2,630.0L116.4,629.3L114.9,629.2L115.0,628.4L113.8,628.1L112.9,624.8L111.8,625.9L111.2,624.9L112.7,623.6L112.6,621.2L114.1,621.8L115.4,620.6L115.1,620.1L113.9,620.6L113.6,617.3L111.9,617.5L110.8,616.0L109.1,616.8L110.0,615.8L108.7,613.1L109.3,611.7L108.3,611.4L108.2,612.5L107.9,611.5L106.8,612.0L107.4,605.9L105.6,605.4L105.0,604.4L104.2,599.6L102.8,598.1L103.4,596.3L101.8,593.0L102.2,590.5L101.3,589.6L99.9,590.0L100.2,591.4L99.2,591.1L97.3,588.7L94.4,587.8L97.7,586.2L98.2,581.9L98.8,579.8L99.7,579.8L97.0,574.4L97.5,572.8ZM136.9,645.9L136.8,646.2L137.0,645.9ZM115.0,628.2L116.6,626.7L117.0,627.0L117.3,625.1ZM82.7,545.1L83.0,542.2L83.1,541.8L84.6,546.3L83.3,546.7Z","lp":[153.1,596.9]},"Dorset":{"d":"M202.4,587.8L203.8,585.5L207.5,584.0L211.7,584.2L213.0,582.6L214.3,583.8L216.8,582.2L219.8,582.6L219.8,581.8L223.6,580.1L226.8,580.6L227.2,579.6L226.2,577.8L227.6,575.7L226.8,574.1L228.1,573.2L227.7,570.2L228.3,569.6L229.0,570.1L229.8,569.0L231.1,569.8L231.8,569.2L231.7,567.6L233.2,568.5L234.8,568.3L235.7,570.6L238.0,573.2L239.0,572.1L238.7,571.2L240.0,570.8L241.0,572.0L245.8,570.0L245.2,568.7L243.6,568.7L243.3,567.1L246.9,563.1L245.6,560.0L247.3,558.8L251.3,560.0L253.1,559.8L256.5,563.5L258.0,567.6L261.7,570.1L261.6,572.0L262.9,573.8L265.3,573.1L267.5,570.8L270.5,570.4L271.1,569.4L273.1,568.8L273.2,570.1L275.7,572.0L279.0,576.9L281.2,575.3L283.4,575.8L283.0,578.4L280.7,580.0L280.4,582.8L282.1,583.8L283.7,582.9L284.0,585.1L284.8,585.9L283.9,586.6L283.4,589.0L285.2,593.8L287.8,592.2L288.5,594.0L288.2,595.7L292.5,595.3L291.8,596.9L289.2,597.5L287.8,599.8L283.9,598.8L279.5,599.2L276.3,600.6L273.8,603.0L274.7,601.2L273.5,600.6L273.0,599.3L270.7,599.7L270.9,600.2L267.2,598.9L267.1,599.5L265.3,599.4L265.1,600.2L266.0,600.4L264.9,600.4L264.5,602.2L265.4,602.5L266.3,601.1L268.3,600.2L268.8,601.0L267.7,600.9L268.3,602.4L267.3,603.0L268.3,602.8L267.4,604.1L268.2,604.3L268.6,603.1L269.3,603.0L269.4,604.2L270.1,603.8L270.6,604.7L271.6,603.6L271.3,604.7L272.2,605.4L272.1,604.5L273.6,603.3L274.3,604.2L273.7,607.0L275.5,607.5L273.2,610.3L273.2,611.2L274.1,611.4L273.5,612.8L268.2,613.4L266.2,614.8L265.5,612.9L262.2,612.3L260.6,610.8L259.8,611.2L256.0,609.6L252.8,610.3L242.2,608.0L240.2,608.1L239.0,609.0L238.1,610.5L238.9,611.0L238.2,611.7L239.5,612.5L238.2,612.0L236.8,614.0L233.5,610.1L232.2,610.0L230.5,607.7L227.4,606.3L236.9,614.0L237.5,615.3L240.2,615.5L239.8,615.9L240.4,618.1L237.7,621.8L238.2,616.4L232.5,610.7L225.0,604.9L214.1,598.8L205.8,596.9L203.2,598.6L202.8,597.5L204.1,594.6L202.8,593.1L207.6,590.1L207.2,589.0ZM288.3,598.4L287.2,597.6L287.0,599.0L288.0,599.3ZM271.2,598.9L270.7,597.0L269.3,597.6L270.6,599.7ZM266.6,597.9L267.3,598.9L268.0,597.8Z","lp":[245.1,591.2]},"Durham":{"d":"M247.2,156.3L249.1,153.1L250.0,145.9L251.9,145.1L256.0,146.9L257.3,144.2L259.2,144.5L261.1,140.3L264.8,140.7L267.6,139.6L270.0,137.2L271.4,137.4L273.3,139.1L274.4,139.0L275.6,141.0L278.4,139.3L279.4,134.8L281.6,133.2L283.3,133.4L284.1,132.6L284.9,133.1L287.0,131.8L287.7,132.8L289.4,132.8L289.9,133.5L291.0,132.7L290.9,134.0L292.6,134.6L292.6,136.0L296.1,133.6L297.1,136.2L298.4,135.8L298.3,136.5L300.1,136.2L301.8,137.0L301.9,141.4L303.4,143.8L303.0,144.9L307.2,144.5L307.8,142.2L307.2,140.4L312.0,138.1L313.7,140.6L313.2,140.6L315.0,148.3L319.0,153.3L323.2,156.1L323.3,156.7L322.2,156.2L321.8,158.0L323.3,161.0L324.5,161.6L321.8,164.3L323.5,164.5L323.8,163.7L324.4,165.7L321.9,168.9L318.4,168.0L317.8,170.3L316.5,170.9L317.3,171.9L316.3,174.1L316.6,176.0L319.6,177.0L318.2,178.0L318.2,179.5L316.7,179.2L315.4,180.8L312.6,182.2L312.5,181.3L311.3,182.0L310.2,179.0L309.3,179.8L308.5,179.0L308.1,180.7L306.9,180.5L305.1,177.8L304.2,178.2L305.2,179.1L305.0,183.7L304.1,181.2L302.6,181.0L302.9,180.0L301.8,181.0L301.6,180.1L300.7,180.0L301.2,181.5L299.5,181.5L298.9,180.0L297.1,178.6L297.3,177.8L296.5,177.8L297.1,176.9L295.8,177.1L295.2,176.1L293.8,176.7L293.8,175.5L292.4,175.6L292.2,174.5L288.2,173.7L287.4,175.3L284.4,174.8L284.6,177.6L283.5,180.1L280.5,177.4L279.3,178.0L279.2,180.4L273.8,183.6L272.0,183.8L270.3,182.1L267.2,181.1L267.2,180.3L262.5,182.6L259.1,183.0L259.8,181.5L258.9,174.8L257.3,174.7L256.5,172.6L250.4,167.6L249.1,163.7L251.5,161.6L251.2,160.1L249.0,159.3L247.4,157.6Z","lp":[284.7,157.8]},"East Riding of Yorkshire":{"d":"M329.3,270.4L330.8,268.7L331.2,266.5L332.0,266.2L333.6,267.6L337.4,267.2L337.4,266.3L338.6,266.7L338.9,265.2L342.4,264.7L341.9,263.2L338.6,262.9L337.8,261.3L340.7,259.5L340.3,255.5L341.2,253.9L339.8,253.1L339.3,248.9L341.0,245.7L339.1,245.3L340.9,242.2L340.9,237.9L340.0,237.0L340.6,234.4L342.6,233.5L343.6,231.5L348.7,230.7L348.9,231.2L353.0,229.9L353.3,231.8L356.3,232.2L356.1,229.8L357.9,229.0L358.8,227.1L357.8,226.2L360.7,225.3L364.1,222.6L366.6,223.5L370.4,220.9L371.1,219.9L370.8,218.9L372.8,217.6L372.4,214.6L373.3,213.5L375.1,213.2L376.2,215.6L378.1,216.4L379.6,216.0L380.9,217.5L383.4,217.0L385.8,217.8L386.8,215.0L394.4,218.0L395.8,219.3L394.0,220.8L390.0,221.5L388.4,223.6L387.1,226.2L387.2,231.7L391.3,243.4L393.2,246.7L409.9,269.4L412.1,276.0L411.9,276.9L409.7,279.5L412.0,275.8L407.7,272.0L404.4,271.1L398.8,273.5L395.5,272.9L388.0,264.9L387.1,265.0L386.8,262.3L386.0,262.7L385.9,261.9L383.1,261.3L374.4,264.0L366.3,265.5L363.6,263.5L360.5,262.7L360.2,263.3L361.2,263.1L357.8,264.1L356.2,266.1L354.0,266.0L356.0,266.8L355.8,269.1L354.5,268.9L351.1,271.6L351.2,270.7L350.1,271.2L346.3,274.2L339.7,271.4L333.0,271.9Z","lp":[366.8,246.2]},"East Sussex":{"d":"M393.6,581.4L394.9,579.8L397.6,580.7L397.9,578.6L398.9,578.1L399.0,579.3L401.3,578.6L402.2,572.4L403.3,571.9L402.4,568.7L405.3,566.9L406.2,568.3L408.8,568.0L409.3,565.6L408.8,562.9L410.2,561.8L410.1,560.5L411.1,559.5L409.7,559.5L409.3,557.6L408.3,557.5L407.6,555.5L410.8,554.4L410.8,553.5L411.4,554.2L413.1,553.5L412.0,552.7L411.9,550.2L413.5,549.8L419.3,549.2L421.3,550.2L420.7,551.7L422.1,552.6L425.9,551.5L427.2,552.5L429.3,552.7L429.3,551.8L432.8,551.5L433.6,553.4L435.2,553.4L434.8,555.7L436.3,555.2L437.9,555.7L439.6,558.0L442.7,558.7L443.5,561.4L448.1,562.2L448.4,563.4L450.5,564.2L456.8,562.4L457.9,563.9L460.0,564.9L462.4,564.1L465.1,565.2L465.1,566.7L465.6,566.6L467.7,570.3L469.6,568.6L470.7,569.0L471.6,571.2L470.7,572.3L465.0,571.7L462.0,573.8L457.2,578.8L437.6,585.0L429.6,594.3L426.0,594.5L421.7,592.3L419.8,592.4L415.9,589.9L415.1,590.0L415.2,590.6L404.6,587.1L395.7,585.4Z","lp":[434.0,571.8]},"Essex":{"d":"M406.9,487.6L407.2,483.3L408.3,482.9L409.9,479.7L418.1,477.0L418.9,475.0L419.8,474.7L419.6,469.7L421.2,468.9L419.8,467.3L420.3,466.2L416.3,467.2L416.2,462.9L414.8,457.5L414.1,456.2L412.2,456.2L412.1,453.8L413.7,452.0L414.5,447.7L415.4,447.7L416.1,449.1L417.6,448.4L418.6,448.9L418.7,448.2L420.2,447.5L419.7,446.1L421.0,443.9L423.2,444.2L424.4,445.5L426.0,443.7L426.7,444.0L429.4,445.8L431.0,448.4L433.8,449.7L433.3,448.3L434.9,446.5L437.2,445.6L438.3,446.1L439.1,444.9L441.6,447.5L442.2,446.9L444.4,447.0L445.0,445.8L447.0,444.9L454.0,443.4L456.0,445.0L455.4,445.8L456.4,447.6L455.2,447.7L455.1,448.7L456.3,450.0L458.1,449.5L458.0,451.8L459.6,453.2L459.6,454.5L460.6,454.8L460.5,456.1L461.2,456.6L463.2,457.1L464.1,456.2L465.9,457.0L468.6,455.5L471.0,455.1L472.3,455.7L473.6,454.9L474.2,456.5L476.1,456.3L477.9,457.2L479.5,456.6L481.0,457.6L480.2,457.5L480.5,458.1L484.5,458.6L488.0,457.5L488.7,458.2L491.9,458.3L493.2,457.2L495.3,458.2L496.3,457.1L496.7,458.5L495.9,458.4L493.6,460.8L494.2,461.3L493.4,463.1L493.7,462.4L492.0,462.3L491.1,463.1L492.2,463.7L491.1,463.8L490.3,464.5L491.0,465.1L489.1,466.0L490.0,466.2L492.0,464.9L491.3,466.2L492.2,465.8L492.7,467.4L494.0,466.6L495.2,467.1L494.7,464.1L496.5,465.3L496.5,466.7L492.8,471.8L486.0,476.8L480.1,477.7L478.2,474.3L480.0,474.1L481.2,472.6L477.8,473.9L475.7,470.6L477.4,470.5L475.3,469.5L474.5,471.3L475.6,472.6L474.5,472.1L474.1,471.0L473.0,472.2L476.3,473.7L474.8,473.6L476.9,474.3L477.0,475.2L473.3,477.4L470.3,477.7L470.2,476.3L473.0,473.9L474.5,473.6L471.2,473.5L471.5,474.1L472.6,474.0L470.3,474.3L469.6,477.1L468.0,475.8L468.2,476.7L466.6,476.3L466.1,476.9L468.6,477.1L469.6,478.4L465.8,477.9L467.2,478.5L466.3,478.5L466.9,479.5L467.6,479.0L469.0,479.5L467.1,481.3L462.9,481.2L462.6,482.1L461.8,481.3L459.0,483.0L457.5,482.3L456.7,483.7L457.4,484.9L459.9,485.0L459.9,485.7L461.4,485.3L459.6,487.6L460.7,487.3L461.3,485.9L463.3,485.3L463.1,484.2L464.9,483.8L467.2,484.5L469.9,481.1L472.4,480.7L473.7,482.5L473.2,485.9L474.0,487.6L473.2,493.3L471.1,494.5L468.0,494.7L463.5,494.4L461.8,493.6L462.8,494.6L468.5,495.4L468.5,497.3L465.3,497.3L463.9,498.8L464.5,498.8L463.8,499.8L464.7,499.6L465.4,501.4L467.7,502.0L463.1,506.1L455.2,504.4L453.6,504.4L452.3,505.3L449.4,504.6L452.0,505.9L451.8,506.6L453.0,506.4L448.7,508.1L447.3,507.9L444.2,505.2L445.1,507.3L446.4,507.6L439.6,509.2L438.7,508.3L439.8,509.5L439.2,513.6L437.2,514.5L432.7,514.8L431.1,512.4L429.7,512.7L428.6,513.9L423.7,510.9L424.9,509.8L424.6,509.0L425.6,508.8L425.3,507.6L426.1,506.5L426.5,507.7L427.1,507.7L427.2,506.1L431.9,505.0L430.4,502.3L428.8,502.5L427.3,498.6L426.2,498.4L426.9,497.6L424.0,495.1L422.4,495.9L418.1,496.2L413.6,498.4L410.0,495.8L410.0,494.5L407.6,494.0ZM480.5,472.0L481.4,471.9L480.4,471.9ZM452.1,504.6L452.5,504.7L452.5,504.6ZM466.7,497.9L468.7,497.6L469.1,495.5L474.8,494.6L473.0,497.8L468.8,501.7L466.0,501.2L466.9,499.1Z","lp":[439.0,479.2]},"Gloucestershire":{"d":"M222.6,486.3L223.7,485.6L224.3,483.7L223.1,482.0L223.9,479.2L223.3,478.2L224.6,477.3L224.5,476.0L226.2,473.8L227.0,474.2L228.7,472.3L229.9,473.0L230.1,471.7L233.5,471.8L235.1,469.1L236.5,469.7L239.8,467.8L239.3,465.5L238.1,464.4L238.1,461.8L235.7,460.8L236.3,460.3L236.1,458.5L237.7,457.0L236.3,455.5L237.2,453.9L238.3,453.8L238.4,454.8L240.1,454.8L240.1,456.7L241.7,457.1L242.7,456.8L243.1,455.0L246.0,454.1L245.9,454.9L247.8,456.0L247.7,459.1L248.6,459.1L249.5,460.1L252.8,460.2L254.9,457.0L257.3,457.5L257.7,456.5L258.7,456.8L257.2,454.4L257.9,454.0L257.7,451.8L258.3,451.2L262.0,451.8L262.1,452.7L260.5,453.4L259.8,455.2L260.5,456.5L262.4,454.8L264.3,455.3L265.9,454.9L266.7,456.1L267.5,456.0L271.2,452.5L273.4,452.3L274.8,453.1L276.0,451.5L281.1,455.7L282.1,453.0L281.4,451.6L279.5,450.5L278.7,448.7L280.6,447.7L281.6,448.3L282.5,447.0L283.0,447.6L283.6,445.7L286.0,443.9L287.5,446.1L288.7,445.3L288.6,448.3L289.7,449.0L290.5,448.4L290.3,449.8L291.4,450.7L291.1,452.1L293.2,453.0L295.9,452.1L296.3,452.7L293.1,456.7L293.0,457.8L293.3,460.4L295.4,461.4L296.6,463.4L294.5,465.1L295.3,467.6L293.6,468.0L293.0,470.1L291.7,471.4L292.4,473.1L291.7,474.9L292.0,478.2L289.5,480.6L290.7,482.0L291.7,485.4L291.1,487.2L291.6,488.5L294.4,491.6L293.0,492.0L291.1,490.7L290.1,493.0L287.1,494.0L284.7,493.5L283.1,489.7L282.3,492.8L282.8,494.0L280.4,494.7L278.8,491.8L277.2,492.1L278.6,495.2L275.6,494.6L274.1,493.2L272.7,494.5L273.5,496.9L271.7,496.8L270.4,495.3L269.1,495.4L266.1,493.0L259.5,502.0L257.7,501.0L256.9,501.8L255.8,501.4L255.6,500.6L253.4,501.8L253.1,503.0L251.3,503.4L252.1,504.3L251.6,508.0L252.6,509.1L247.6,512.3L248.5,513.5L249.9,513.5L249.6,516.6L250.3,516.7L249.6,520.0L248.4,520.7L247.5,519.1L246.2,518.8L237.4,521.4L236.7,520.7L235.8,521.1L235.9,519.9L234.6,519.9L232.6,518.0L233.8,517.5L234.5,516.2L234.3,512.7L231.8,512.8L229.3,511.8L229.7,510.0L224.8,510.4L223.4,506.9L224.1,503.7L226.6,500.2L230.3,497.3L230.7,494.7L233.1,492.2L230.9,490.3L227.9,492.7L225.2,497.3L225.0,499.7L223.9,495.7L223.0,495.5L224.0,493.7L222.6,493.7L224.6,492.5L223.6,491.8L223.8,490.4L222.8,489.6L223.9,489.0Z","lp":[257.4,482.8]},"Greater Manchester":{"d":"M221.7,287.1L222.5,286.3L223.4,282.8L222.5,280.9L224.2,279.5L224.5,277.8L228.1,277.4L228.7,279.0L230.7,277.1L232.4,278.8L236.3,275.4L238.4,276.5L239.7,276.2L241.1,273.3L242.2,275.8L245.6,274.9L246.1,272.2L245.6,271.0L249.1,272.3L250.3,271.0L250.6,274.0L252.2,276.8L253.1,276.2L252.3,273.4L253.9,271.4L255.7,270.8L256.5,272.4L258.0,273.1L257.9,274.2L259.4,273.9L260.4,269.4L260.7,269.7L261.2,269.0L262.3,270.6L263.9,270.7L266.7,269.2L268.6,276.7L269.5,276.6L273.9,282.8L275.9,283.9L276.1,285.4L275.0,287.3L275.3,288.5L273.3,289.2L272.5,288.6L270.9,291.7L271.0,294.6L269.6,296.1L269.8,296.8L269.1,296.4L268.4,297.4L269.2,299.0L270.6,299.1L269.8,302.3L265.6,305.5L263.8,304.5L261.9,305.0L260.8,304.4L260.0,306.5L260.5,307.1L259.4,308.8L257.2,307.6L258.0,307.0L257.7,306.0L253.0,305.1L250.0,307.4L250.3,306.4L247.5,304.3L245.5,304.7L241.7,302.1L238.3,301.1L240.2,298.9L237.6,293.9L237.1,291.7L233.5,293.1L233.6,293.8L232.2,294.1L231.8,295.5L229.2,293.5L229.4,291.6L227.3,291.6L225.9,289.5L223.7,289.2Z","lp":[247.9,288.9]},"Hampshire":{"d":"M273.1,568.8L273.7,569.6L275.2,568.0L278.0,567.8L278.9,567.0L279.0,569.2L280.4,567.2L281.6,566.6L283.0,569.2L284.1,568.6L287.3,570.1L289.8,570.3L293.8,573.7L295.7,572.2L296.8,572.2L297.9,570.0L296.8,569.5L296.1,567.8L298.3,566.6L298.2,565.0L295.9,564.0L296.2,558.9L295.5,557.4L296.2,554.6L293.7,553.5L294.3,550.3L293.0,547.8L293.2,546.4L291.5,545.0L291.8,543.8L295.7,543.4L297.5,539.5L299.6,539.2L301.8,540.3L302.5,540.0L302.9,538.7L302.2,538.6L302.0,536.3L303.4,535.7L303.6,534.7L302.6,532.4L303.0,530.0L305.1,531.0L309.7,530.1L308.8,528.1L309.9,527.9L311.1,526.1L315.4,526.7L322.2,526.1L327.4,527.6L330.1,527.6L331.6,527.2L331.7,525.7L333.7,524.6L336.3,527.5L345.0,526.5L348.2,527.9L351.1,527.8L355.4,530.1L357.6,532.6L358.8,538.5L357.7,541.3L355.5,540.1L353.7,540.4L353.5,539.9L350.5,543.7L352.2,546.9L351.7,550.6L353.7,549.8L356.2,553.9L357.9,554.5L357.7,555.5L357.0,555.6L357.4,557.4L355.5,558.2L354.3,560.0L351.2,559.7L350.5,562.1L347.5,564.7L347.7,566.8L346.7,567.8L345.1,573.2L344.5,573.5L345.7,575.6L344.6,576.3L343.4,579.3L345.6,582.3L345.1,584.3L342.3,584.8L341.8,585.6L340.4,584.3L339.1,585.2L338.8,586.6L337.9,585.6L335.8,585.5L337.4,586.0L337.5,590.4L338.4,589.9L338.5,590.7L334.4,592.0L332.9,590.6L332.7,588.8L334.0,588.5L333.4,588.1L333.7,587.3L334.2,587.7L333.5,586.6L334.6,586.8L335.1,585.4L334.3,586.4L333.0,585.4L333.2,584.5L332.2,585.4L329.6,584.6L328.5,585.1L328.3,583.9L328.0,585.4L329.5,585.4L329.5,586.9L330.3,586.7L331.8,588.9L332.3,590.4L331.3,591.2L332.7,590.7L330.6,592.6L327.2,590.8L325.5,588.6L318.9,585.1L319.2,580.9L318.2,581.3L318.6,584.3L313.4,579.6L313.9,577.5L313.1,577.9L312.8,580.5L312.4,579.3L309.4,577.5L309.0,578.3L307.7,577.5L306.5,575.3L307.1,577.4L306.7,576.9L306.1,577.8L306.8,577.4L308.1,578.6L310.4,579.0L313.9,583.7L315.3,584.2L315.2,585.0L316.5,585.0L316.6,586.7L317.7,586.8L317.6,587.9L318.6,588.2L318.9,587.5L318.8,588.1L316.4,591.3L311.8,591.4L312.9,592.3L311.7,593.2L305.2,595.0L303.0,594.1L303.5,596.0L302.5,596.5L303.2,596.9L301.3,598.7L299.8,599.0L300.8,599.8L301.5,599.4L301.6,600.2L295.5,597.4L291.8,596.9L292.4,595.3L288.1,595.8L288.5,594.0L287.8,592.3L285.2,593.8L283.4,589.0L283.9,586.6L284.8,585.9L284.0,585.2L283.7,583.0L282.1,583.8L280.4,582.9L280.7,579.9L283.0,578.4L283.4,575.8L281.2,575.3L279.0,576.9L275.7,572.0L273.2,570.1ZM338.8,589.9L341.0,589.6L341.7,587.2L341.2,586.5L342.8,585.6L344.0,586.8L343.6,588.6L342.7,588.6L343.9,589.3L343.0,590.8L344.0,590.9L343.8,591.4L345.0,590.8L344.9,591.9L338.9,590.8Z","lp":[322.7,563.0]},"Herefordshire":{"d":"M191.9,441.7L192.4,440.5L195.3,439.9L196.7,438.6L196.1,437.8L194.9,438.7L193.3,437.7L195.2,435.5L194.8,433.4L196.8,432.2L196.8,429.7L198.7,429.5L198.5,428.1L199.4,427.4L201.5,426.6L203.4,427.2L205.2,426.2L201.0,425.0L201.9,420.2L204.2,419.4L205.1,417.2L206.5,417.1L206.2,415.9L208.5,415.2L207.3,414.4L207.6,413.1L209.3,414.4L209.6,413.3L211.9,412.2L214.4,412.7L215.3,413.0L215.2,414.4L216.1,414.5L216.2,416.5L220.2,416.7L219.1,419.0L218.0,419.0L221.4,421.9L223.6,421.6L223.1,421.1L224.8,418.2L227.6,420.6L228.0,422.2L224.9,422.5L226.5,424.5L229.3,425.0L227.2,427.3L227.2,429.5L230.9,428.2L233.8,428.2L234.2,428.7L236.2,427.8L235.8,425.5L239.3,424.7L240.9,426.3L238.2,427.9L237.7,429.5L238.4,430.3L241.2,430.0L243.9,431.4L242.5,431.8L243.3,433.2L242.2,433.9L241.2,437.2L240.4,437.7L241.7,440.2L244.1,439.2L246.0,440.4L246.0,444.9L246.9,446.4L246.0,454.1L243.2,455.0L242.7,456.8L241.7,457.1L240.1,456.7L240.1,454.8L238.3,454.8L238.2,453.8L237.2,453.9L236.4,455.5L237.8,457.0L236.1,458.5L235.8,460.8L238.1,461.8L238.1,464.4L239.3,465.4L239.9,467.8L236.5,469.7L235.1,469.2L233.5,471.8L230.1,471.7L230.0,473.1L228.7,472.3L227.0,474.2L226.2,473.8L225.3,475.6L224.2,474.6L222.3,474.7L222.0,473.6L220.8,474.0L220.5,473.1L219.2,474.4L216.5,471.1L217.2,469.5L212.6,466.6L212.2,465.3L210.8,465.7L211.9,464.8L209.8,463.5L203.2,466.6L202.9,464.1L200.8,464.1L199.6,460.8L196.8,457.8L194.7,453.4L195.6,451.5L195.3,450.3L192.9,447.2L193.2,444.4L194.4,444.2L194.4,443.0Z","lp":[220.2,443.6]},"Hertfordshire":{"d":"M356.5,473.3L358.4,471.6L359.9,471.5L360.6,472.4L360.0,473.4L362.0,476.1L364.3,475.6L367.8,477.0L369.3,474.4L372.2,477.1L373.3,476.0L372.7,474.8L373.3,473.6L375.4,472.6L374.9,471.7L375.4,471.4L377.0,472.3L378.8,472.0L382.2,474.2L382.8,472.8L384.4,471.9L383.7,468.7L379.7,462.8L380.6,457.8L381.4,457.7L381.2,460.6L381.9,461.0L383.5,459.9L383.5,458.4L382.2,457.0L386.0,457.1L387.1,454.9L388.0,454.9L388.9,457.3L390.4,456.7L390.6,455.1L393.5,453.9L392.2,450.9L393.8,448.0L395.4,448.2L396.3,445.9L397.1,447.2L396.6,449.0L398.1,449.7L398.7,452.5L405.9,447.6L407.5,449.0L410.0,448.6L412.1,453.8L412.2,456.2L414.1,456.2L414.8,457.5L416.2,462.9L416.3,467.1L420.4,466.1L419.8,467.3L421.3,468.9L419.6,469.7L419.8,474.7L418.9,475.0L418.1,477.0L409.9,479.7L408.3,483.0L407.3,483.3L406.9,487.6L407.5,490.1L401.0,489.1L397.1,489.6L395.2,492.3L394.3,491.7L393.8,492.6L391.1,493.3L390.7,494.9L387.4,495.6L386.6,495.2L380.6,498.3L378.1,497.6L376.9,498.5L374.2,496.5L373.9,500.0L372.6,499.7L371.2,495.7L371.3,493.2L372.3,493.4L372.4,492.4L373.4,491.8L372.1,490.8L370.4,490.8L370.7,489.2L369.4,487.6L370.2,486.3L370.0,485.1L368.5,484.8L367.7,483.1L365.9,483.7L361.9,481.6L360.4,478.8L360.7,477.9L359.1,475.7L358.0,476.0Z","lp":[401.2,473.1]},"Isle of Wight":{"d":"M299.3,605.1L302.0,603.4L303.8,600.2L307.5,599.9L310.5,598.0L311.6,598.2L311.0,598.3L311.5,599.3L312.4,599.6L311.9,598.8L313.3,598.4L312.2,597.9L315.7,596.5L318.6,593.4L319.8,593.9L320.2,595.3L320.1,593.9L321.3,593.5L323.2,595.0L323.6,596.4L324.1,596.0L325.5,597.0L329.8,597.0L333.0,598.4L334.0,601.3L335.8,602.0L333.8,604.6L331.5,604.9L329.5,606.4L327.8,612.2L319.6,614.7L313.3,609.0L309.1,607.2L306.5,604.6ZM333.1,601.4L333.9,601.2L333.4,600.8ZM305.6,600.8L304.8,600.4L305.4,601.1Z","lp":[317.7,604.0]},"Kent":{"d":"M412.1,541.9L413.7,538.1L412.5,533.2L415.5,533.0L415.4,530.5L417.6,528.9L417.6,527.3L418.9,527.2L419.9,524.4L419.5,521.8L420.5,521.8L419.5,520.1L420.0,517.6L420.6,517.8L421.1,516.2L423.2,514.9L424.3,512.1L428.1,514.8L430.9,513.5L431.7,515.1L435.6,515.7L439.7,515.1L440.9,514.2L440.6,513.3L441.3,513.2L440.8,512.9L441.5,511.1L446.9,510.5L451.7,511.6L457.6,511.7L459.1,513.1L459.4,514.8L458.5,515.9L456.2,516.1L455.7,514.5L453.3,514.8L452.1,515.8L451.5,517.3L452.0,516.8L452.5,517.3L451.6,518.1L448.4,519.0L446.2,518.8L445.1,520.2L445.6,521.7L446.6,519.0L448.3,520.7L450.6,521.5L451.1,521.1L450.8,521.5L451.8,522.3L452.4,521.3L453.4,521.1L453.3,522.1L454.3,520.2L456.0,522.7L457.0,520.7L458.1,520.6L457.8,522.0L458.9,521.5L457.6,517.6L459.8,517.4L459.0,518.3L459.7,519.8L462.4,521.6L459.4,518.1L460.1,518.7L461.1,518.0L460.3,517.0L461.2,514.5L463.6,515.0L466.4,516.6L471.8,517.4L475.4,522.2L471.8,524.3L469.1,522.7L467.8,523.4L465.4,522.6L462.5,523.0L462.6,523.8L466.0,524.1L466.1,524.7L469.7,524.2L471.9,525.4L471.1,526.8L471.7,526.3L472.8,526.8L471.9,525.8L479.4,524.6L481.2,522.7L500.8,520.2L506.2,518.5L508.4,518.4L509.6,519.1L510.0,522.2L508.7,525.9L508.5,525.4L508.1,525.7L508.6,526.1L505.4,525.7L504.2,527.6L505.0,527.4L507.8,536.6L508.1,542.8L507.5,544.8L506.3,546.6L504.0,547.8L504.1,548.8L503.7,548.3L502.2,548.8L503.0,550.1L501.2,549.9L498.9,551.3L495.6,551.9L493.3,554.0L493.9,554.4L484.6,556.7L480.3,560.7L478.2,567.0L479.4,573.2L470.7,572.3L471.6,571.2L470.7,569.0L469.6,568.6L467.7,570.4L465.6,566.6L465.1,566.8L465.1,565.2L462.4,564.1L460.0,564.9L457.9,563.9L456.7,562.4L450.5,564.2L448.4,563.4L448.0,562.2L443.5,561.4L442.7,558.7L439.5,558.0L437.9,555.7L436.3,555.2L434.7,555.7L435.2,553.5L433.6,553.4L432.8,551.5L429.4,551.8L429.4,552.8L427.2,552.5L425.9,551.5L422.1,552.6L420.6,551.7L421.2,550.2L419.3,549.2L413.5,549.8L413.6,545.6Z","lp":[460.5,540.0]},"Lancashire":{"d":"M200.4,258.3L201.2,242.4L203.9,241.4L203.9,243.8L204.5,241.5L209.4,239.2L210.3,239.6L209.3,239.9L210.6,240.5L212.2,240.0L213.3,238.9L211.9,238.3L213.4,238.6L213.6,237.6L214.7,238.3L212.4,236.0L214.0,233.7L215.8,234.1L215.4,232.5L212.6,233.0L212.3,234.8L212.1,234.1L212.0,234.6L211.1,234.5L210.9,231.2L209.5,230.1L210.8,229.2L212.4,225.6L216.4,223.9L216.0,222.5L218.7,219.1L217.9,219.5L215.9,218.3L215.4,214.3L218.0,211.7L220.0,213.0L222.2,213.3L222.1,215.0L225.7,215.8L228.4,211.3L229.3,212.1L232.5,212.1L240.1,207.3L240.1,208.7L235.2,216.3L233.5,216.9L233.2,219.8L235.8,223.3L236.8,223.3L239.7,225.5L239.4,228.8L242.2,229.7L245.6,228.5L246.7,231.8L247.8,232.9L247.0,232.8L247.0,234.6L247.8,235.1L249.2,234.6L250.8,236.8L255.0,236.0L255.6,236.4L254.9,237.2L255.3,238.3L257.2,237.4L258.1,241.2L261.4,242.2L262.7,243.4L263.3,246.1L264.7,247.8L264.2,248.7L267.1,250.7L267.0,253.0L261.7,256.3L261.9,257.6L261.1,258.5L261.4,261.6L258.7,264.8L260.4,269.4L259.4,273.9L257.8,274.2L258.0,273.1L256.5,272.4L255.7,270.8L253.9,271.4L252.3,273.3L253.1,276.2L252.1,276.9L250.6,274.0L250.3,271.2L249.2,272.4L245.7,271.0L245.6,274.9L242.2,275.8L241.1,273.4L239.7,276.2L238.4,276.5L236.3,275.4L232.4,278.9L230.7,277.2L228.7,279.0L228.1,277.4L224.5,277.8L224.2,279.5L222.5,280.9L223.4,282.8L222.5,286.4L219.1,287.8L218.2,285.9L215.9,288.0L215.4,291.0L214.1,291.1L213.7,290.1L212.7,290.2L211.2,288.8L211.6,287.0L208.9,286.4L207.3,284.3L205.4,284.1L206.3,286.6L205.4,287.5L200.7,284.3L201.2,281.9L202.4,281.4L202.5,279.9L201.5,279.4L202.0,277.8L204.1,275.1L205.2,275.6L206.1,274.6L208.0,271.6L207.0,267.2L207.8,267.4L207.3,267.0L208.0,266.7L207.1,266.5L207.8,266.1L208.5,266.9L208.9,266.5L207.5,265.7L208.2,264.2L209.3,265.2L208.8,264.3L212.9,263.4L215.3,265.2L214.7,263.2L214.4,263.7L213.7,263.1L215.9,262.1L210.8,263.3L205.7,263.2L201.6,261.6Z","lp":[233.2,249.7]},"Leicestershire":{"d":"M297.3,378.5L300.5,376.3L300.8,375.0L299.6,372.9L300.3,371.5L303.6,371.0L304.3,371.9L306.0,371.1L306.8,369.9L306.3,368.8L307.7,368.2L307.6,367.1L309.4,367.1L311.3,363.7L310.9,363.2L313.2,361.2L313.8,361.3L314.2,359.8L315.5,360.0L315.9,359.2L319.4,359.1L319.0,363.2L319.8,366.1L321.7,367.0L322.3,368.2L324.2,368.4L326.5,366.5L328.7,366.5L329.6,365.0L332.5,364.4L332.7,365.5L336.0,364.6L338.6,364.7L339.0,362.5L340.2,362.1L342.2,359.6L341.4,358.4L343.0,358.2L346.9,355.2L346.6,354.3L349.1,351.2L348.5,350.6L350.9,347.2L352.1,347.1L352.2,349.1L353.8,350.1L352.4,355.1L353.6,355.6L353.1,357.1L354.7,357.5L358.9,365.4L360.3,371.5L354.4,373.8L352.7,373.1L350.2,374.7L349.7,376.2L352.1,378.5L352.5,381.3L350.7,384.0L350.9,386.8L350.0,389.4L351.9,389.3L353.8,391.0L354.2,392.9L355.6,394.7L355.4,395.8L357.4,397.3L354.4,398.9L353.2,398.1L350.2,398.5L346.8,397.3L345.9,398.7L346.0,401.1L345.0,401.8L346.0,403.5L344.7,404.8L342.0,403.9L341.3,402.9L338.0,403.6L335.1,406.4L335.7,407.5L334.7,409.1L332.3,407.6L329.3,409.9L328.0,412.0L325.6,412.6L324.4,412.1L317.2,401.4L302.4,392.9L302.1,391.6L299.9,390.1L300.3,388.0L299.1,385.7L300.9,384.7L300.4,382.2L297.8,380.0Z","lp":[324.9,379.2]},"Lincolnshire":{"d":"M339.7,287.6L340.1,285.7L343.5,284.9L342.9,283.7L343.5,281.7L342.9,281.4L343.1,279.8L345.1,273.7L346.3,274.2L350.1,271.2L351.2,270.7L351.2,271.4L354.5,268.9L355.8,269.1L356.0,267.7L356.8,269.2L356.3,267.2L361.8,264.9L363.5,267.2L366.6,268.5L365.6,267.5L367.8,268.0L366.8,268.5L367.6,268.9L371.1,266.5L376.1,266.2L376.4,267.0L376.5,265.9L382.7,264.5L389.1,272.6L396.3,278.9L397.3,279.3L398.4,278.7L402.2,282.5L402.0,281.6L403.8,284.9L404.9,285.2L404.4,285.6L405.1,285.3L405.4,286.6L406.6,286.1L404.4,284.4L407.8,286.1L408.5,285.9L408.4,287.7L408.8,288.5L409.5,288.2L409.5,289.3L410.3,289.2L409.6,288.3L410.2,288.1L410.0,287.0L411.3,287.6L411.8,289.2L412.3,289.1L412.0,288.1L412.5,288.3L414.4,290.7L413.9,290.5L414.8,293.7L418.4,298.2L425.1,313.6L427.5,321.3L427.3,330.2L426.4,333.1L426.4,332.2L424.7,332.7L425.2,332.9L421.5,335.7L422.1,335.8L421.4,336.6L420.2,337.1L420.6,337.5L414.5,342.2L409.7,350.8L407.5,353.4L409.2,352.3L408.8,353.8L409.5,353.7L409.8,354.6L414.4,355.9L414.1,356.8L414.8,356.2L416.6,357.0L419.3,362.9L421.4,362.7L422.8,363.6L421.5,366.9L423.4,368.1L417.7,372.5L414.1,372.1L411.2,374.0L409.4,373.6L408.2,375.1L408.6,378.7L406.8,380.6L403.2,381.1L401.0,379.6L399.4,380.6L398.4,380.1L395.9,382.4L393.2,381.5L392.3,382.4L391.0,380.9L387.8,382.6L385.8,380.6L382.7,380.1L381.7,381.6L378.0,383.2L374.8,382.6L371.9,384.2L369.9,381.5L371.1,382.1L374.5,380.8L376.0,379.3L376.1,376.9L371.8,376.5L368.5,375.0L368.7,373.4L366.4,371.8L364.2,372.1L363.8,371.1L360.3,371.5L358.9,365.4L354.7,357.5L353.1,357.1L353.6,355.6L352.4,355.1L353.7,350.2L352.2,349.1L352.1,347.1L350.3,343.2L350.9,343.3L351.4,341.7L353.2,341.3L353.9,338.4L357.5,337.0L355.2,333.6L356.0,331.6L354.9,330.3L356.0,329.2L355.8,324.8L352.7,324.2L354.9,321.1L355.9,321.4L357.1,320.0L358.5,320.2L359.1,317.8L357.6,315.7L354.6,316.3L354.5,317.4L351.7,317.1L352.5,314.2L351.6,313.0L352.5,311.2L353.4,311.8L353.6,310.7L353.4,308.5L352.2,307.8L352.7,305.2L351.7,304.0L350.5,304.1L351.5,302.6L350.5,301.7L351.4,300.4L350.6,298.4L348.6,297.1L348.4,295.6L349.9,294.0L345.0,292.8L342.1,293.5L341.8,292.9L343.0,291.8L340.7,288.8L340.9,287.9Z","lp":[390.8,324.5]},"Merseyside":{"d":"M196.9,283.0L200.1,275.6L203.6,270.9L203.1,269.2L205.1,268.9L204.9,268.1L205.5,268.5L206.2,267.1L206.0,267.8L206.7,268.3L207.1,267.9L206.9,268.8L207.5,269.2L207.6,268.3L208.0,271.6L206.1,274.6L205.2,275.6L204.1,275.1L202.0,277.8L201.5,279.4L202.5,279.8L202.4,281.4L201.2,281.9L200.8,284.4L205.4,287.5L206.2,286.5L205.3,284.0L207.3,284.3L208.9,286.4L211.6,287.0L211.2,288.9L212.7,290.2L213.7,290.1L214.1,291.1L215.4,290.9L215.9,288.0L218.2,285.9L219.1,287.8L221.7,287.1L223.7,289.2L225.9,289.5L227.3,291.6L229.5,291.6L229.3,293.5L231.8,295.5L231.2,296.2L230.4,295.2L230.5,295.8L228.4,296.7L227.6,295.6L225.1,294.7L224.8,296.1L225.7,296.0L225.3,296.9L226.0,297.4L225.1,301.9L224.2,302.2L222.7,301.6L222.5,300.6L220.6,300.3L219.7,302.6L218.4,302.6L217.7,305.3L215.6,306.2L215.0,308.1L213.2,308.5L205.3,302.7L203.5,299.1L203.1,296.0L201.0,293.0L199.5,288.5L199.6,286.3L199.3,286.9L198.1,286.3L197.1,284.9ZM190.0,301.9L191.8,300.1L200.9,295.5L203.4,303.1L208.2,310.5L205.6,311.3L203.9,310.6L201.7,311.6L198.5,309.5L195.2,312.5L195.8,311.9L194.3,311.5L194.5,310.4L194.9,311.3L194.8,310.5L195.8,310.3L194.4,309.5L194.4,308.1L195.9,309.2Z","lp":[199.0,305.6]},"Norfolk":{"d":"M415.7,378.4L416.7,372.2L417.7,372.4L423.3,368.2L421.5,366.9L422.8,363.6L423.9,363.7L424.2,362.9L424.5,363.6L426.1,362.9L428.1,363.3L427.9,364.0L428.6,363.9L430.8,368.6L429.8,364.5L429.1,364.0L430.1,363.5L429.0,363.5L433.9,358.8L435.0,359.1L434.6,356.6L437.4,348.1L440.8,345.0L442.6,344.9L442.2,345.3L443.1,346.1L443.8,345.1L444.1,346.0L444.9,345.9L443.9,344.7L445.9,345.1L445.8,345.8L446.4,345.6L446.2,345.0L449.5,344.4L449.3,345.3L447.4,345.4L450.4,345.5L451.0,344.2L452.4,344.9L454.6,344.5L454.7,345.5L455.3,345.1L454.8,344.3L459.0,344.5L461.1,344.0L461.6,346.1L462.8,346.4L462.7,345.2L462.0,345.9L462.3,345.1L461.8,345.1L462.6,343.8L463.9,345.3L464.4,344.6L465.2,344.9L464.7,345.6L465.5,345.9L466.3,345.0L467.4,345.9L470.5,345.1L472.6,345.1L472.5,345.8L473.5,344.7L471.7,343.9L468.7,344.6L469.8,343.3L480.0,346.1L491.9,347.6L501.0,352.9L511.8,361.3L519.8,369.6L522.9,378.2L523.8,390.7L522.8,390.9L521.1,389.5L518.8,389.0L516.3,391.8L518.1,394.4L519.3,394.1L520.1,395.0L518.6,398.1L517.8,397.8L517.0,398.8L515.9,398.8L513.6,397.2L512.4,397.7L511.8,399.6L509.9,398.6L508.4,399.3L506.5,398.3L504.2,400.2L502.4,398.7L501.9,399.7L503.4,400.2L503.4,401.4L501.7,401.6L498.8,403.6L497.8,406.2L495.8,408.2L493.7,408.0L492.0,410.2L489.0,412.1L478.9,410.0L472.1,411.2L469.6,409.2L465.2,409.2L463.4,408.1L461.2,409.5L458.3,409.5L457.1,410.3L456.3,409.0L453.2,408.9L451.6,407.7L454.7,403.0L452.5,402.7L451.2,401.7L449.6,403.1L443.7,402.7L441.6,403.6L436.3,403.9L435.2,405.2L435.1,403.2L431.8,400.5L430.7,398.1L426.8,396.9L423.2,397.6L422.6,398.5L419.8,396.4L421.3,395.5L419.9,395.2L419.6,392.5L420.3,391.8L419.6,391.3L420.4,390.5L418.5,387.6L420.3,385.0L416.9,381.9L417.8,381.3L417.8,378.9ZM453.6,346.0L454.6,344.8L453.5,344.8Z","lp":[469.0,375.3]},"North Yorkshire":{"d":"M233.2,219.7L233.5,216.8L235.2,216.3L240.1,208.7L243.6,208.9L244.2,207.3L245.8,207.2L246.5,206.2L247.4,207.5L248.9,207.1L249.5,203.9L248.9,202.8L249.4,202.0L249.1,199.3L249.9,197.9L246.2,194.3L247.7,193.9L249.5,192.1L250.8,192.0L251.1,190.5L250.3,189.8L250.1,187.3L251.1,185.1L253.9,183.7L257.8,184.0L258.6,182.6L262.5,182.6L267.3,180.2L267.2,181.1L270.3,182.1L272.0,183.8L273.8,183.6L279.2,180.4L279.3,178.0L280.5,177.4L283.5,180.0L284.6,177.6L284.4,174.8L287.4,175.2L288.1,173.6L292.2,174.5L292.5,175.6L293.8,175.5L293.9,176.7L295.2,176.1L295.8,177.1L297.2,176.9L296.6,177.7L297.3,177.7L297.1,178.6L298.9,180.0L299.6,181.5L301.2,181.4L300.6,180.0L301.6,180.1L301.8,181.0L303.0,179.8L302.6,181.0L304.1,181.1L304.9,183.3L305.2,179.1L304.1,178.2L305.2,177.8L306.9,180.5L308.1,180.7L308.5,178.9L309.3,179.8L310.2,178.9L311.3,181.9L312.6,181.2L312.7,182.1L315.4,180.8L316.7,179.2L318.2,179.5L318.2,178.0L319.5,177.0L316.6,176.1L316.3,174.1L317.3,171.9L316.5,170.9L317.8,170.3L318.4,168.0L321.9,168.8L324.6,166.5L324.7,163.8L325.9,163.6L325.8,162.1L327.4,163.8L331.3,165.0L334.7,167.5L337.2,168.4L338.8,168.0L341.3,169.9L344.2,169.8L348.7,171.2L351.4,174.5L353.2,173.8L355.4,175.4L356.2,177.5L360.1,178.2L362.5,179.5L366.0,183.3L365.3,184.8L365.9,186.6L369.4,189.2L372.0,195.0L373.0,196.0L373.8,200.2L375.2,200.8L374.5,202.3L376.4,205.1L383.2,208.5L382.0,209.3L382.5,211.9L384.7,214.1L386.8,215.0L385.8,217.8L383.4,217.0L380.9,217.5L379.6,216.0L378.1,216.4L376.2,215.6L375.1,213.2L373.3,213.5L372.4,214.6L372.9,217.6L370.9,218.9L371.1,219.9L370.4,220.9L366.6,223.5L364.1,222.6L360.7,225.3L357.9,226.1L358.8,227.0L357.9,229.0L356.1,229.8L356.4,232.2L353.3,231.8L352.9,229.9L348.8,231.2L348.6,230.7L343.6,231.5L342.6,233.5L340.6,234.4L340.0,237.0L340.9,237.9L340.9,242.2L339.2,245.2L341.0,245.6L339.3,248.9L339.8,253.1L341.2,253.9L340.3,255.5L340.7,259.6L337.8,261.4L338.7,262.9L341.9,263.2L342.4,264.8L338.9,265.2L338.6,266.8L337.5,266.4L337.4,267.2L333.6,267.6L332.1,266.2L331.2,266.5L330.8,268.7L329.4,270.4L333.0,271.9L331.8,272.7L328.2,273.0L327.3,274.5L326.0,273.4L323.7,274.2L322.4,273.5L321.9,275.5L320.8,275.9L319.3,273.2L320.0,268.0L322.9,267.7L323.0,267.0L321.6,265.5L321.2,266.0L320.9,265.5L318.4,265.5L316.1,262.5L315.3,262.3L315.4,260.9L316.6,261.0L316.9,260.1L315.3,258.1L315.2,255.0L315.9,254.2L313.8,252.3L314.4,251.5L312.7,249.7L315.3,248.7L314.7,244.6L316.1,244.0L315.5,241.1L313.1,240.5L313.3,239.8L309.7,240.2L309.1,241.9L307.4,242.0L307.3,243.8L305.4,244.3L303.0,243.3L299.8,243.8L299.5,244.7L297.5,244.0L297.2,244.9L296.4,244.0L295.0,244.7L293.0,244.4L292.7,243.7L290.8,243.9L289.4,243.0L288.6,244.1L286.8,242.6L284.8,242.7L282.9,240.8L280.2,240.6L280.9,241.6L279.2,241.5L278.0,238.2L274.8,239.5L273.3,238.8L272.3,239.4L272.5,241.4L271.6,242.2L273.2,244.7L271.5,245.0L271.4,248.3L268.7,248.3L267.1,250.7L264.2,248.7L264.7,247.8L263.3,246.1L262.6,243.4L261.4,242.2L258.1,241.2L257.2,237.4L255.3,238.3L254.9,237.2L255.6,236.4L255.0,236.0L250.8,236.8L249.2,234.7L247.8,235.1L247.0,234.5L247.0,232.8L247.7,232.8L246.7,231.8L245.6,228.5L242.2,229.7L239.4,228.8L239.7,225.5L236.8,223.3L235.8,223.3Z","lp":[302.1,219.3]},"Northamptonshire":{"d":"M315.8,437.5L317.1,435.1L321.0,434.2L318.9,429.7L320.2,430.1L323.6,426.6L322.4,423.9L324.0,421.1L320.2,419.7L322.3,417.7L326.2,416.5L324.4,412.1L325.6,412.6L328.0,412.0L329.3,409.9L332.3,407.6L334.7,409.1L335.7,407.5L335.0,406.5L338.0,403.6L341.3,402.9L342.0,403.9L344.8,404.8L346.0,403.5L344.9,401.8L346.0,401.0L345.9,398.7L346.8,397.3L350.2,398.5L353.2,398.1L354.5,398.9L357.4,397.3L360.9,392.4L364.7,390.1L365.7,390.3L366.2,389.3L366.9,390.3L367.8,389.4L368.6,389.5L368.1,388.6L368.9,385.9L370.4,384.0L372.0,384.2L373.6,386.0L372.3,390.7L373.2,391.6L377.5,390.9L378.1,392.6L377.3,393.2L378.5,395.4L377.8,396.8L381.8,398.9L381.5,400.8L382.8,403.3L380.9,406.3L381.4,407.0L377.8,409.5L376.2,412.5L372.6,413.2L373.0,413.8L372.4,415.4L373.8,416.6L373.5,417.5L374.6,417.7L374.7,419.5L371.1,420.1L369.6,423.2L370.3,425.4L369.6,427.0L368.0,427.3L365.4,424.6L362.0,425.8L363.2,430.3L361.1,434.0L358.6,434.4L355.6,437.2L353.7,437.0L352.7,439.0L351.7,438.4L351.3,440.0L350.1,439.9L350.3,441.1L346.7,441.9L346.3,443.2L347.4,443.5L347.5,444.8L349.1,445.7L350.2,447.8L349.6,448.8L348.1,449.1L348.8,450.2L347.1,452.6L346.2,452.4L345.2,453.6L341.9,447.0L340.8,448.1L336.8,447.6L335.8,447.9L336.8,449.0L334.4,449.1L330.3,451.1L329.4,453.6L330.6,454.4L329.5,456.4L327.5,456.9L325.3,458.7L322.2,457.8L319.3,458.5L319.6,454.7L317.2,450.5L318.2,447.6L316.8,447.4L316.6,446.6L321.5,445.4Z","lp":[346.7,422.2]},"Northumberland":{"d":"M226.2,101.5L227.7,97.9L229.9,97.6L230.0,95.3L231.1,95.0L229.0,93.6L230.3,93.4L231.4,91.0L233.7,89.5L234.6,87.2L237.1,86.6L240.0,83.2L243.8,82.7L244.8,83.9L246.1,83.8L248.7,81.8L248.2,81.2L249.2,80.2L248.3,78.2L248.8,77.3L250.3,77.4L253.6,74.5L255.5,75.0L257.8,73.2L258.2,71.3L259.5,70.6L257.4,69.8L257.3,68.2L255.6,66.0L254.9,60.9L251.9,58.1L251.9,55.5L250.2,53.6L250.6,52.8L249.7,53.0L248.9,52.3L250.9,50.7L255.2,51.3L254.5,50.1L256.3,48.8L256.3,47.5L259.6,44.2L259.0,42.7L260.6,42.2L261.0,40.4L262.7,40.5L263.3,38.2L264.7,37.9L264.7,34.5L267.9,32.5L270.9,37.2L269.9,37.7L274.0,42.6L278.2,45.0L278.2,48.6L280.1,51.1L282.2,52.1L283.3,50.3L283.0,49.4L283.4,49.6L283.3,50.7L285.6,53.3L285.5,53.9L283.7,54.1L284.5,55.5L286.1,53.8L287.6,54.1L292.8,58.3L292.4,58.8L294.1,61.2L292.7,62.9L294.7,64.6L294.6,67.4L295.9,67.9L295.8,73.6L297.0,74.7L296.7,77.4L294.7,79.8L296.3,85.2L297.2,85.0L298.7,86.8L297.4,90.3L297.5,92.4L302.0,102.0L301.2,102.2L299.8,104.7L302.8,109.6L302.1,108.7L303.4,113.7L303.8,113.2L304.5,114.3L302.6,115.2L302.8,116.6L301.5,117.3L301.4,116.5L300.0,116.6L299.5,115.8L298.4,116.6L297.2,116.5L297.0,115.6L293.2,115.5L292.6,113.9L288.4,115.4L289.6,117.9L286.1,120.0L285.7,122.3L284.6,122.3L284.9,124.8L283.6,124.5L282.1,125.4L280.8,127.9L281.2,130.5L280.3,130.6L279.6,131.9L281.6,133.2L279.4,134.8L278.4,139.3L275.7,140.6L275.6,141.2L274.4,139.0L273.4,139.1L271.4,137.4L270.0,137.2L267.6,139.6L264.8,140.7L261.1,140.3L259.2,144.6L257.3,144.2L256.0,146.9L251.9,145.2L250.0,145.9L249.1,144.4L247.7,144.1L245.0,141.3L243.7,138.7L242.9,140.1L240.5,141.1L238.3,143.7L236.5,144.2L234.2,143.0L232.7,139.7L233.3,138.8L231.3,135.4L233.1,134.1L233.8,131.6L235.1,130.5L233.7,129.2L233.7,127.2L232.0,126.6L231.6,125.8L233.4,124.0L233.5,120.8L239.2,118.2L237.9,115.7L239.0,113.4L238.0,112.5L234.2,113.3L233.8,111.9L232.2,110.9L231.9,108.7L228.2,107.4L226.9,105.2L227.1,103.0ZM300.8,106.9L300.2,107.4L301.7,108.1ZM279.2,47.0L279.5,46.1L282.6,46.0L284.0,46.4L284.0,48.4L282.5,48.3L281.7,46.8Z","lp":[265.3,89.9]},"Nottinghamshire":{"d":"M314.0,337.8L314.9,336.0L316.8,335.2L316.4,334.3L316.9,333.6L315.5,330.5L315.3,327.0L317.5,326.0L319.6,326.7L320.9,325.1L323.7,324.4L322.9,320.8L323.4,318.8L322.6,317.4L323.3,315.9L325.1,315.5L324.7,314.9L325.6,314.0L324.8,313.0L324.9,311.0L323.4,310.3L327.4,306.9L327.2,306.4L326.2,306.6L325.8,305.2L327.4,305.3L326.9,303.9L327.9,303.1L327.7,301.5L328.9,300.7L328.9,299.6L331.2,297.4L334.5,296.9L334.6,297.5L335.6,297.4L336.8,296.2L337.4,292.3L339.6,290.9L340.7,288.8L343.1,291.8L341.8,292.9L342.1,293.5L345.0,292.8L349.9,294.0L348.5,295.6L348.6,297.1L350.6,298.4L351.4,300.4L350.6,301.6L351.6,302.5L350.6,304.1L351.7,304.0L352.7,305.2L352.3,307.8L353.4,308.5L353.6,310.7L353.4,311.9L352.5,311.3L351.6,313.0L352.5,314.2L351.7,317.1L354.4,317.4L354.6,316.3L357.6,315.7L359.1,317.8L358.5,320.2L357.1,320.0L355.9,321.4L354.9,321.1L352.8,324.2L355.8,324.8L356.0,329.3L354.9,330.3L356.0,331.6L355.2,333.6L357.5,337.1L353.9,338.4L353.2,341.3L351.4,341.7L350.4,343.4L352.1,347.1L350.9,347.2L349.8,349.3L349.3,349.1L348.5,350.6L349.1,351.1L346.6,354.3L346.9,355.1L343.0,358.2L341.5,358.4L342.3,359.6L340.2,362.1L339.0,362.5L338.7,364.7L336.0,364.6L332.7,365.5L332.4,364.4L329.6,365.0L328.7,366.5L326.5,366.5L324.2,368.4L322.3,368.2L321.7,367.0L319.8,366.1L319.0,363.2L319.4,359.1L321.2,358.3L321.2,357.0L320.8,355.8L318.4,355.0L317.9,348.4L314.9,341.6Z","lp":[335.7,328.1]},"Oxfordshire":{"d":"M289.4,480.6L292.0,478.2L291.7,474.9L292.4,473.1L291.7,471.4L293.0,470.1L293.6,467.9L295.3,467.6L294.5,465.1L296.5,463.4L295.3,461.4L293.3,460.4L293.0,457.8L296.7,461.3L298.1,459.7L297.6,459.0L301.0,458.5L300.5,457.3L302.9,456.7L305.2,445.9L305.9,445.1L307.9,445.5L307.5,443.8L309.4,443.2L312.2,445.8L314.0,445.1L313.2,443.2L311.6,443.1L313.5,441.2L314.7,441.2L315.8,437.5L321.6,445.4L316.6,446.6L316.8,447.4L318.2,447.6L317.2,450.6L319.6,454.7L319.3,458.5L322.2,457.7L325.3,458.7L327.5,456.9L329.5,456.4L330.6,454.4L335.1,455.8L332.3,460.8L333.4,462.4L335.1,461.9L332.9,464.7L333.4,465.3L332.5,467.9L334.2,468.6L333.6,469.8L334.5,470.7L334.7,473.4L335.7,473.9L333.6,475.1L330.6,473.4L329.3,474.6L331.4,476.4L330.4,477.5L330.5,479.0L331.7,480.4L333.3,480.5L333.6,483.2L336.0,484.5L337.0,484.4L337.1,483.0L340.0,483.6L340.5,482.6L342.3,482.9L344.4,484.0L346.9,487.1L346.5,490.1L347.5,491.4L346.4,491.9L347.7,492.8L344.9,492.4L344.0,493.2L344.3,494.7L342.8,494.8L343.8,496.4L342.8,497.3L343.6,498.5L343.3,499.9L345.1,500.5L343.4,502.1L343.7,503.6L346.2,505.3L346.4,507.5L347.9,508.9L348.5,511.1L346.9,511.9L345.0,515.1L343.1,516.1L342.7,515.4L343.6,514.3L342.4,512.4L339.7,513.4L338.6,515.4L337.0,514.4L335.9,512.6L333.4,513.3L332.4,512.9L331.6,510.7L329.6,510.0L329.7,507.0L325.3,508.6L325.2,507.6L321.4,507.6L316.7,504.8L315.7,507.0L314.0,506.1L312.8,507.4L311.4,506.7L310.1,508.0L309.8,506.9L308.4,507.9L307.3,507.7L306.8,508.8L303.9,506.4L302.6,506.9L300.9,506.1L299.2,507.9L298.9,509.3L297.7,510.0L294.5,504.0L294.0,503.6L292.5,504.3L291.5,502.8L291.5,500.3L293.1,499.1L292.7,498.4L293.6,497.0L291.4,495.1L290.8,493.1L292.0,490.9L293.0,492.0L294.3,491.5L291.7,488.5L291.1,487.2L291.7,485.4L290.7,482.0Z","lp":[311.4,477.0]},"Rutland":{"d":"M349.7,376.2L350.2,374.7L352.7,373.0L354.4,373.8L360.3,371.5L363.9,371.1L364.2,372.1L366.4,371.8L368.7,373.4L368.6,375.1L371.8,376.5L376.1,376.9L376.0,379.3L374.5,380.8L371.1,382.1L370.1,381.7L371.9,384.2L370.4,384.0L368.9,385.9L368.1,388.6L368.7,389.6L367.8,389.4L366.9,390.4L366.2,389.4L365.7,390.3L364.7,390.1L360.9,392.4L357.4,397.3L355.4,395.7L355.6,394.7L354.2,392.9L353.7,391.0L351.9,389.3L350.0,389.5L350.9,386.8L350.7,384.0L352.5,381.3L352.1,378.5Z","lp":[360.5,384.1]},"Shropshire":{"d":"M186.1,406.6L188.8,402.9L190.0,403.1L194.7,400.4L200.2,400.2L200.1,397.7L202.0,398.2L202.7,394.6L201.3,392.0L196.4,394.6L196.5,396.5L193.2,397.2L193.0,396.5L194.7,395.7L192.9,390.7L194.4,390.7L196.3,389.3L196.0,388.2L198.2,385.8L196.8,384.6L199.0,383.9L199.9,380.9L199.3,379.1L201.0,377.4L201.2,375.4L202.5,375.9L204.1,375.2L204.0,376.4L205.2,376.3L204.9,374.6L203.2,374.4L203.1,373.3L201.1,372.4L201.9,371.6L201.5,370.7L200.2,371.0L199.3,370.0L197.3,370.1L196.7,367.6L194.7,368.7L191.8,367.3L192.3,366.2L191.3,366.1L191.4,364.7L192.5,362.2L191.8,361.6L194.1,359.5L192.5,358.1L193.6,357.5L192.9,356.9L195.1,356.5L196.4,352.4L197.7,353.0L200.5,352.6L202.3,349.7L204.1,349.3L204.6,348.3L205.6,350.3L207.7,351.7L210.5,350.2L210.8,350.8L213.6,351.3L216.4,356.5L219.3,353.4L221.1,353.3L221.4,349.8L220.7,348.3L221.3,346.9L223.2,345.5L224.8,346.6L227.6,345.4L230.2,347.4L230.0,349.2L230.7,350.0L232.4,349.0L234.5,350.9L235.1,348.0L237.8,349.7L240.9,348.6L240.8,346.7L244.5,345.4L245.3,347.5L244.6,347.9L244.1,350.4L242.4,349.5L242.8,351.0L241.5,350.7L240.8,351.4L238.4,355.7L240.1,359.1L240.5,358.4L244.6,357.2L243.6,363.4L242.1,364.4L244.6,366.1L245.1,368.0L244.2,368.7L249.0,374.0L249.3,376.3L248.2,378.0L248.5,379.1L249.6,380.5L253.4,380.5L254.0,382.6L253.4,383.4L254.2,383.5L254.3,384.4L252.7,388.6L251.0,389.1L248.2,388.4L248.3,390.4L249.8,390.5L252.3,393.2L251.0,394.9L252.7,396.2L251.9,397.4L252.4,398.2L250.3,399.5L248.9,402.0L250.6,405.8L248.9,407.8L245.4,407.6L244.7,411.7L247.3,413.6L245.1,413.3L243.5,414.0L242.2,413.4L241.9,415.5L237.8,415.6L236.8,416.9L237.3,419.6L235.1,419.8L235.2,418.9L233.4,418.1L231.8,419.3L231.7,421.7L230.9,421.0L228.0,422.2L227.6,420.6L224.8,418.3L223.1,421.0L223.8,421.6L221.4,421.9L217.8,418.8L219.1,419.0L220.1,416.7L216.1,416.5L216.1,414.5L215.1,414.4L215.2,413.0L211.9,412.2L209.6,413.3L209.3,414.5L207.7,413.2L207.3,414.4L208.8,415.3L206.2,415.9L206.5,417.1L203.7,416.6L199.2,417.7L197.8,417.2L194.5,414.0L191.5,412.7L189.9,410.3L187.2,408.9Z","lp":[226.6,383.7]},"Somerset":{"d":"M141.5,546.4L145.2,547.1L149.5,546.3L149.1,541.5L150.0,540.4L156.1,541.6L156.9,542.3L159.9,540.7L162.4,540.8L165.6,541.8L167.4,543.5L169.0,543.5L172.2,546.5L180.8,547.0L189.5,543.9L191.5,543.6L194.9,544.8L198.9,542.9L198.0,545.5L198.6,545.4L200.3,542.2L200.3,540.4L198.8,537.7L199.6,531.5L198.0,530.7L201.1,531.9L201.6,528.4L200.8,527.6L202.7,526.8L203.1,525.6L203.1,524.7L201.8,524.1L204.7,523.2L204.8,523.8L206.7,523.5L210.5,517.5L214.6,513.4L219.2,512.7L219.5,511.6L222.5,514.0L224.1,513.4L226.0,515.6L226.6,517.6L225.7,518.5L226.3,518.9L226.1,522.7L230.4,523.1L231.1,521.8L232.8,521.8L233.5,519.2L235.9,519.9L235.9,521.0L236.7,520.7L237.5,521.3L246.2,518.8L247.5,519.1L248.4,520.6L249.6,520.0L250.7,521.4L249.9,522.5L250.5,523.5L249.5,523.8L249.8,526.6L246.3,529.2L249.5,529.6L249.2,530.6L251.1,531.8L251.1,532.7L250.2,533.3L250.5,535.0L251.6,534.7L252.4,535.4L253.0,539.4L249.2,548.2L245.9,552.8L246.0,553.8L244.6,554.5L244.8,556.6L247.3,558.8L245.6,560.0L247.0,563.1L243.3,567.1L243.6,568.6L245.2,568.7L245.9,570.0L241.0,572.0L240.0,570.8L238.8,571.2L239.0,572.1L238.0,573.2L235.7,570.6L234.8,568.3L233.2,568.5L231.7,567.7L231.8,569.2L231.0,569.8L229.8,569.1L229.0,570.1L228.3,569.6L227.7,570.2L228.1,573.3L226.8,574.2L227.6,575.7L226.2,577.8L227.2,579.6L226.8,580.7L223.6,580.1L219.9,581.8L219.8,582.6L216.8,582.2L214.3,583.8L213.0,582.6L211.7,584.2L207.5,584.0L203.8,585.5L202.9,587.2L201.8,585.7L201.5,583.3L197.1,583.8L197.4,582.6L195.9,581.1L196.1,577.4L190.9,578.0L189.6,579.2L186.6,577.0L188.1,572.9L181.9,573.4L179.2,571.9L176.5,568.8L173.3,569.3L173.3,564.8L170.9,564.6L170.4,563.3L167.7,563.9L166.1,562.9L164.6,563.3L163.5,563.7L163.6,565.0L162.4,566.2L157.6,565.7L156.8,564.7L158.3,560.4L154.7,560.0L151.6,557.4L149.6,557.3L143.8,553.3L141.8,550.7ZM201.6,532.6L201.2,532.9L201.3,533.0ZM200.5,542.3L200.3,542.4L200.5,542.4Z","lp":[195.0,549.4]},"South Yorkshire":{"d":"M281.9,287.3L283.1,285.5L285.2,285.8L287.2,285.0L288.4,282.9L292.0,283.7L293.4,282.7L295.6,282.5L296.8,281.0L296.5,279.8L297.4,279.1L297.5,277.6L299.2,277.6L301.2,279.1L302.0,278.4L303.4,278.7L303.5,278.0L304.3,278.9L306.6,277.0L309.8,278.5L311.3,277.6L313.2,280.2L315.9,281.0L319.2,279.1L319.8,276.4L321.8,275.5L322.3,273.4L323.7,274.2L326.0,273.4L327.3,274.5L328.2,273.0L331.8,272.7L333.0,271.9L339.7,271.4L345.1,273.7L343.1,279.8L342.9,281.4L343.5,281.7L342.9,283.7L343.5,284.9L340.1,285.7L339.7,287.6L340.9,287.9L340.7,288.8L339.6,290.9L337.4,292.3L336.8,296.2L335.6,297.4L334.5,297.5L334.4,296.9L331.2,297.4L328.9,299.6L328.9,300.7L327.7,301.5L327.9,303.1L326.9,303.9L327.4,305.3L325.9,305.3L326.2,306.5L327.3,306.3L327.4,306.9L323.2,311.1L321.4,310.7L320.5,311.4L317.9,310.6L317.0,310.0L317.5,308.7L316.8,308.0L315.1,308.5L314.2,309.9L311.0,309.7L310.9,307.8L309.3,307.1L308.7,307.9L307.3,307.6L306.1,308.3L306.4,309.3L305.5,309.8L303.3,309.8L301.0,311.3L299.3,311.1L299.2,310.1L298.0,310.5L297.7,309.5L296.8,310.6L296.1,309.3L294.9,310.0L294.6,309.5L295.9,307.0L297.2,306.6L292.5,304.4L293.1,301.6L289.7,300.2L289.4,298.8L287.4,298.4L287.0,293.8L283.3,291.7L283.6,289.3Z","lp":[311.1,291.3]},"Staffordshire":{"d":"M238.4,355.6L240.7,351.4L241.5,350.7L242.8,351.0L242.4,349.4L244.1,350.3L244.6,347.9L245.3,347.5L244.4,344.3L245.2,343.6L244.3,342.3L244.5,339.4L246.8,338.9L248.8,336.2L250.4,336.5L253.1,334.8L253.6,335.2L259.7,327.5L260.6,327.8L260.7,324.8L262.6,326.5L265.4,326.2L267.0,323.8L270.0,323.8L270.9,321.5L272.6,320.1L273.0,321.5L279.4,324.3L282.6,328.1L282.0,330.0L284.6,333.8L283.9,335.4L285.1,338.6L284.9,340.2L286.3,341.1L286.0,345.2L281.7,347.8L281.6,351.0L279.8,353.8L281.6,358.1L285.1,358.2L288.6,360.8L290.0,360.0L290.3,360.7L291.0,360.3L295.2,361.4L298.0,363.9L296.4,365.6L297.6,366.4L297.8,367.4L296.1,368.7L296.3,369.5L292.6,369.2L290.1,375.0L293.3,376.2L293.4,378.7L297.3,378.5L297.8,380.0L294.1,383.3L294.9,384.9L294.3,385.2L294.2,389.3L292.7,390.6L288.4,391.1L287.5,390.4L284.5,391.1L283.9,389.8L281.7,388.8L280.0,389.5L278.7,391.4L277.4,389.8L277.8,388.0L275.8,385.8L276.5,385.0L275.6,384.2L276.1,383.5L274.6,382.9L273.8,383.5L273.2,382.9L272.7,385.0L268.1,386.9L268.1,387.9L266.7,387.5L264.6,388.4L263.2,385.9L261.2,385.6L258.7,387.5L258.6,388.7L256.8,389.0L257.3,391.0L256.2,391.4L257.9,392.6L258.2,394.8L261.0,394.9L260.9,397.0L259.8,398.0L260.3,399.0L257.1,400.5L258.7,404.0L258.1,405.9L258.7,409.3L251.8,407.7L250.1,406.5L250.6,405.8L248.9,402.0L250.3,399.5L252.4,398.2L251.8,397.4L252.7,396.2L250.9,394.9L252.3,393.2L249.8,390.5L248.3,390.4L248.2,388.3L251.0,389.1L252.7,388.6L254.2,383.6L253.3,383.4L253.9,382.6L253.3,380.5L249.6,380.5L248.5,379.1L248.1,378.0L249.2,376.3L249.0,374.0L244.1,368.6L245.0,367.9L244.6,366.1L242.0,364.4L243.6,363.3L244.6,357.3L240.5,358.4L240.1,359.2Z","lp":[269.9,365.0]},"Suffolk":{"d":"M429.8,424.1L430.8,422.8L431.0,420.8L432.6,421.2L435.6,425.2L440.6,423.1L440.9,421.9L437.6,418.5L435.8,418.6L435.3,417.1L436.4,414.9L434.0,413.5L431.6,408.3L436.3,403.9L441.6,403.6L443.7,402.7L449.6,403.1L451.2,401.7L452.5,402.7L454.9,403.0L451.7,407.7L453.2,408.9L456.4,409.0L457.1,410.3L458.3,409.5L461.2,409.5L463.4,408.1L465.2,409.2L469.6,409.2L472.1,411.2L478.9,410.0L488.9,412.1L492.0,410.2L493.7,408.0L495.8,408.2L497.8,406.2L498.8,403.6L501.7,401.6L503.4,401.4L503.3,400.2L501.8,399.7L502.4,398.6L504.2,400.2L506.5,398.3L508.4,399.3L509.8,398.5L511.8,399.6L512.4,397.7L513.6,397.2L515.9,398.8L517.0,398.8L517.8,397.7L518.6,398.1L520.0,395.0L519.3,394.1L518.1,394.4L516.2,391.8L518.8,389.0L521.1,389.5L522.8,390.9L523.8,390.7L525.7,396.3L525.2,397.4L525.2,397.4L525.2,396.8L522.9,397.2L525.2,397.4L523.8,400.2L523.7,405.3L520.6,415.2L519.0,416.8L517.9,419.5L517.7,429.3L515.3,440.7L508.5,445.0L512.5,441.9L510.0,442.9L507.3,445.4L505.6,450.1L503.1,452.6L503.1,451.1L501.0,450.6L503.0,452.2L502.8,453.0L499.9,456.0L498.3,458.7L497.9,456.7L495.7,455.3L495.3,452.2L488.2,449.3L486.6,447.9L490.6,452.0L494.4,452.8L495.2,456.1L492.9,455.8L491.3,456.8L489.1,456.6L487.4,455.1L485.2,457.0L482.1,456.6L481.0,457.6L479.5,456.6L477.9,457.2L476.1,456.3L474.2,456.5L473.5,454.9L472.2,455.7L471.0,455.1L468.6,455.5L465.9,457.0L464.2,456.2L463.2,457.1L461.2,456.6L460.5,456.2L460.6,454.8L459.6,454.5L459.6,453.2L458.0,451.8L458.1,449.5L456.3,450.0L455.0,448.7L455.2,447.7L456.3,447.5L455.4,445.8L455.9,445.0L454.0,443.4L447.0,444.9L445.0,445.8L444.4,447.0L442.3,446.9L441.6,447.6L439.1,444.9L438.3,446.1L437.2,445.7L434.9,446.5L434.2,443.1L433.2,442.4L433.7,440.7L435.6,438.9L435.4,436.0L436.7,435.9L437.8,434.4L439.1,435.4L440.5,435.2L441.8,428.3L440.5,427.0L439.6,427.7L435.8,425.5L435.0,426.2L435.4,427.1L432.1,428.6L430.0,427.0L431.2,426.1Z","lp":[478.6,423.6]},"Surrey":{"d":"M350.5,543.6L353.5,539.8L353.8,540.4L355.5,540.1L357.7,541.3L358.8,538.5L358.6,535.8L357.6,532.6L355.4,530.1L358.1,526.4L362.8,524.1L366.3,524.1L367.8,517.7L369.3,516.6L372.6,518.2L371.5,515.8L372.6,514.2L377.2,515.8L377.4,517.9L381.9,519.5L382.5,521.0L384.2,520.6L386.4,522.8L387.1,522.6L387.9,524.3L386.4,527.6L386.4,529.7L388.1,529.1L389.3,526.0L391.1,524.1L392.2,524.0L392.3,525.4L393.8,526.5L394.3,528.0L393.5,528.9L394.1,529.5L395.7,528.0L398.6,530.3L398.7,532.6L400.0,532.6L400.9,534.1L403.2,532.5L404.0,530.4L405.9,530.0L406.8,528.2L409.6,529.2L410.6,533.2L411.8,531.5L413.7,538.1L412.1,541.9L413.6,545.6L413.5,549.8L400.4,550.3L400.6,548.4L397.6,547.6L395.1,548.9L395.0,549.7L392.2,550.2L392.2,550.8L389.0,552.5L382.7,553.5L380.8,554.8L374.8,556.8L372.7,556.3L372.4,557.6L369.7,557.1L368.3,557.9L366.1,556.9L361.4,559.0L357.4,557.4L357.0,555.5L357.7,555.5L357.9,554.5L356.2,553.9L354.4,550.4L353.6,549.8L351.6,550.6L352.2,546.9Z","lp":[386.0,537.0]},"Tyne and Wear":{"d":"M279.5,131.9L280.3,130.5L281.2,130.4L280.8,127.9L282.1,125.4L283.6,124.5L284.8,124.8L284.6,122.2L285.7,122.3L286.1,120.0L289.6,117.9L288.4,115.4L292.6,113.8L293.3,115.5L297.0,115.6L297.3,116.5L298.4,116.6L299.5,115.8L300.0,116.6L301.4,116.5L301.6,117.2L302.8,116.6L302.5,115.3L304.5,114.3L307.1,120.4L308.3,120.9L306.6,121.1L304.9,123.9L300.9,124.3L303.7,124.1L303.4,125.4L304.7,125.1L303.9,124.2L305.3,124.3L306.8,121.9L308.4,121.3L307.8,122.7L311.3,126.4L310.7,130.7L311.6,131.3L310.9,131.2L310.5,132.2L311.6,131.6L311.0,133.9L312.0,138.1L307.3,140.4L307.8,142.2L307.2,144.5L302.8,144.9L303.4,143.8L301.9,141.4L301.8,137.0L300.1,136.2L298.2,136.5L298.3,135.8L297.1,136.3L296.1,133.6L292.5,136.1L292.6,134.6L290.9,134.0L290.9,132.8L289.9,133.5L289.4,132.8L287.7,132.8L287.0,131.8L284.9,133.1L284.1,132.6L283.3,133.4Z","lp":[295.9,129.2]},"Warwickshire":{"d":"M272.8,437.7L274.1,436.8L274.5,433.8L275.7,432.2L274.4,425.8L275.8,425.9L277.8,424.6L278.2,421.9L279.1,421.5L279.3,419.4L277.7,416.3L278.8,415.6L283.2,415.7L285.3,417.6L285.1,416.0L287.4,417.0L288.1,415.3L289.1,415.0L289.3,416.9L290.9,417.4L291.6,416.1L293.2,415.8L294.1,416.7L295.8,415.7L297.2,413.1L299.5,413.6L300.6,415.9L302.5,414.2L303.2,415.3L303.8,414.4L306.6,414.8L308.8,412.2L308.3,410.7L309.2,408.2L306.8,405.7L304.6,405.4L303.7,406.3L301.4,404.7L299.9,405.8L295.6,404.9L294.5,407.1L293.1,407.0L292.8,408.0L292.0,407.9L286.8,399.4L286.8,398.5L288.3,398.1L287.1,397.4L286.6,394.7L285.4,393.7L286.1,392.9L284.5,391.1L287.6,390.4L288.5,391.1L292.8,390.5L294.2,389.3L294.3,385.1L294.9,384.8L294.1,383.3L297.8,380.0L300.4,382.2L300.9,384.7L299.1,385.8L300.3,388.0L299.9,390.1L302.1,391.6L302.5,393.0L317.2,401.4L324.4,412.1L326.3,416.5L322.3,417.7L320.2,419.7L324.0,421.1L322.4,423.9L323.6,426.6L320.2,430.1L319.0,429.8L321.0,434.2L317.0,435.1L314.7,441.3L313.5,441.2L311.7,443.0L313.2,443.2L314.1,445.0L312.2,445.8L309.4,443.2L307.6,443.8L308.0,445.5L305.9,445.1L305.2,445.9L302.9,456.7L300.6,457.3L301.0,458.5L300.1,459.0L297.7,459.0L298.1,459.7L296.7,461.4L293.0,457.8L293.0,456.7L296.3,452.7L295.9,452.1L293.2,453.0L291.1,452.1L291.4,450.7L290.3,449.8L290.5,448.5L289.8,449.1L288.6,448.3L288.7,445.4L287.5,446.1L286.0,443.9L286.5,443.5L284.4,443.1L284.7,441.8L283.2,440.9L282.2,441.3L282.2,440.2L281.1,439.5L280.1,441.1L279.2,439.5L277.7,439.1L277.4,440.0L278.0,440.2L276.7,441.6L275.4,439.5L273.9,439.2L274.4,437.7Z","lp":[300.6,420.4]},"West Midlands":{"d":"M256.1,391.4L257.3,391.0L256.8,389.0L258.6,388.7L258.7,387.5L261.2,385.6L263.2,385.9L264.7,388.4L266.7,387.5L268.0,387.8L268.1,386.9L272.7,385.0L273.2,382.8L273.8,383.5L274.6,382.9L276.1,383.5L275.7,384.2L276.5,384.9L275.8,385.9L277.8,388.0L277.4,389.8L278.7,391.3L280.0,389.5L281.7,388.8L283.9,389.8L286.1,393.0L285.4,393.7L286.6,394.7L287.1,397.3L288.5,398.1L286.8,398.5L286.8,399.4L292.0,407.9L292.8,408.0L293.1,407.0L294.5,407.1L295.6,404.9L299.9,405.8L301.4,404.7L303.7,406.3L304.6,405.4L306.9,405.7L309.3,408.2L308.3,410.7L308.8,412.2L306.6,414.8L303.9,414.4L303.2,415.3L302.4,414.2L300.6,415.9L299.5,413.6L297.3,413.1L295.8,415.7L294.0,416.8L293.2,415.8L291.6,416.1L290.9,417.4L289.3,416.9L289.0,415.0L288.1,415.3L287.4,417.0L285.2,416.0L285.4,417.8L283.2,415.7L278.8,415.6L280.6,412.1L279.1,411.5L278.1,412.0L276.0,411.2L274.6,413.4L273.2,412.7L270.2,414.1L267.8,411.7L271.0,410.1L269.0,408.4L267.6,408.9L267.5,407.4L266.3,407.4L265.8,408.9L265.4,408.1L264.3,408.4L263.4,407.0L260.8,409.1L258.9,408.6L258.1,405.9L258.7,404.0L257.1,400.5L260.3,399.0L259.8,398.0L260.9,397.0L261.0,394.9L258.2,394.8L257.9,392.6Z","lp":[272.7,399.9]},"West Sussex":{"d":"M343.4,579.4L344.6,576.3L345.7,575.6L344.4,573.5L345.1,573.2L346.7,567.8L347.7,566.8L347.5,564.7L350.5,562.1L351.2,559.6L354.3,559.9L355.5,558.2L357.4,557.4L361.4,558.9L366.1,556.9L368.3,557.9L369.7,557.1L372.4,557.6L372.7,556.3L374.8,556.8L380.8,554.8L382.7,553.5L389.0,552.5L392.2,550.8L392.1,550.2L395.0,549.7L395.1,548.9L397.6,547.6L400.7,548.4L400.5,550.2L411.9,550.2L412.1,552.7L413.2,553.4L411.4,554.3L410.8,553.7L410.9,554.4L407.6,555.5L408.3,557.5L409.3,557.6L409.7,559.5L411.2,559.4L410.1,560.5L410.2,561.8L408.8,562.9L409.3,565.6L408.8,568.1L406.2,568.3L405.3,566.9L402.4,568.7L403.3,572.0L402.2,572.5L401.3,578.7L399.0,579.4L398.8,578.1L397.9,578.6L397.6,580.8L394.9,579.8L393.6,581.4L395.7,585.4L393.3,585.2L380.3,588.4L371.0,589.2L361.6,591.7L358.1,593.7L357.3,592.3L356.0,593.5L356.7,593.3L357.5,594.6L358.3,594.0L355.6,597.9L353.1,595.5L346.6,591.5L346.6,590.6L347.3,591.4L349.2,588.5L351.5,589.4L352.8,588.8L354.0,585.9L353.6,585.6L353.2,587.4L351.6,588.8L349.8,587.8L350.9,586.3L350.3,586.2L350.4,584.9L349.7,584.9L350.0,586.3L349.2,588.1L348.1,587.3L348.0,585.2L346.7,585.0L347.1,589.5L344.6,587.7L345.6,582.3Z","lp":[373.7,572.8]},"West Yorkshire":{"d":"M258.7,264.8L261.4,261.6L261.1,258.5L261.9,257.6L261.6,256.4L267.0,253.0L267.1,250.7L268.7,248.3L271.4,248.3L271.5,245.0L273.2,244.7L271.6,242.2L272.5,241.4L272.3,239.4L273.3,238.8L274.8,239.5L278.0,238.1L279.3,241.5L280.7,241.6L280.1,240.6L282.9,240.8L284.8,242.7L286.8,242.5L288.0,244.0L288.6,244.1L289.3,243.0L290.8,243.9L292.8,243.7L293.0,244.4L295.0,244.7L296.4,244.0L297.1,244.8L297.5,244.0L299.5,244.7L299.7,243.8L303.0,243.3L305.4,244.3L307.3,243.8L307.4,242.0L309.0,241.9L309.7,240.2L313.4,239.8L313.2,240.5L315.6,241.1L315.5,242.2L316.5,241.9L315.8,242.4L316.3,242.5L316.1,244.1L314.7,244.6L315.3,248.7L312.7,249.8L314.4,251.6L313.8,252.4L315.9,254.2L315.2,255.0L315.3,258.1L316.9,260.1L316.6,261.0L315.4,261.0L315.3,262.3L318.4,265.5L321.6,265.5L323.0,267.7L320.0,268.0L319.3,273.2L321.2,276.3L319.8,276.5L319.2,279.1L315.9,281.0L313.2,280.2L311.3,277.6L309.8,278.5L306.6,277.0L304.3,279.0L303.6,278.1L301.2,279.2L299.2,277.6L297.5,277.6L297.4,279.2L296.5,279.8L296.8,281.0L295.6,282.6L293.4,282.7L292.0,283.7L288.5,282.9L287.2,285.0L285.2,285.8L283.1,285.5L281.9,287.3L280.6,287.4L278.5,285.2L277.1,285.9L276.1,285.4L275.9,283.9L273.9,282.8L269.5,276.7L268.6,276.7L266.7,269.3L264.0,270.7L262.3,270.6L261.3,269.0L260.7,269.8Z","lp":[288.1,263.5]},"Wiltshire":{"d":"M244.6,554.4L246.0,553.8L245.9,552.8L249.2,548.2L253.0,539.4L252.4,535.4L251.6,534.7L250.5,535.0L250.2,533.2L251.1,532.7L251.1,531.8L249.1,530.6L249.4,529.6L246.1,529.2L249.7,526.6L249.5,523.8L250.4,523.5L249.9,522.5L250.7,521.4L249.6,520.0L250.3,516.8L249.5,516.7L249.9,513.6L248.5,513.5L247.6,512.3L252.5,509.1L251.6,508.0L252.1,504.3L251.2,503.4L253.1,503.0L253.3,501.8L255.7,500.6L255.8,501.4L256.9,501.8L257.7,501.0L259.6,502.0L266.1,492.9L269.0,495.4L270.4,495.3L271.7,496.8L273.4,496.9L272.7,494.5L274.1,493.1L275.6,494.6L278.5,495.2L277.1,492.1L278.8,491.8L280.4,494.7L282.8,494.0L282.3,492.8L283.1,489.5L284.7,493.5L287.1,494.0L290.1,493.0L291.1,490.7L292.0,490.9L290.8,493.1L291.4,495.1L293.6,497.0L292.7,498.4L293.2,499.1L291.5,500.4L291.5,502.8L292.5,504.3L294.0,503.5L294.5,504.0L297.6,509.9L298.9,509.3L299.1,512.7L303.2,517.8L303.0,520.5L300.4,520.7L300.0,521.4L301.2,522.0L301.0,523.6L305.2,526.5L304.9,528.0L305.9,528.9L305.1,531.0L303.0,530.1L302.6,532.4L303.6,534.7L303.4,535.7L302.0,536.4L302.2,538.6L302.9,538.6L302.5,540.0L301.8,540.3L299.6,539.2L297.5,539.5L295.7,543.4L291.8,543.8L291.5,544.9L293.2,546.4L293.0,547.8L294.3,550.3L293.7,553.5L296.2,554.6L295.5,557.4L296.2,558.9L295.7,563.2L295.9,564.0L298.2,565.0L298.3,566.5L296.2,567.8L296.8,569.5L298.0,570.0L296.8,572.2L295.7,572.2L293.9,573.7L289.8,570.3L287.3,570.1L284.1,568.7L283.1,569.3L281.6,566.7L280.4,567.2L278.9,569.4L278.9,567.1L278.0,567.8L275.2,568.0L273.6,569.7L273.1,568.9L271.1,569.4L270.5,570.4L267.5,570.8L265.3,573.1L262.9,573.8L261.6,572.0L261.7,570.1L258.0,567.6L256.5,563.5L253.2,559.8L251.3,560.0L247.3,558.8L244.8,556.6Z","lp":[276.6,531.4]},"Worcestershire":{"d":"M224.9,422.5L230.9,421.0L231.7,421.6L231.8,419.3L233.4,418.1L235.2,418.9L235.2,419.7L237.2,419.6L236.8,416.9L237.8,415.5L241.8,415.4L242.2,413.4L243.5,414.0L245.1,413.3L247.0,413.5L244.7,411.7L245.4,407.6L248.9,407.8L250.6,405.8L250.1,406.5L251.8,407.7L258.6,409.3L258.9,408.6L260.9,409.1L263.4,407.0L264.3,408.4L265.5,408.1L265.8,408.8L266.3,407.4L267.5,407.4L267.6,408.9L268.9,408.4L271.0,410.1L267.9,411.7L270.2,414.1L273.3,412.7L274.6,413.4L276.0,411.2L280.6,412.0L278.8,415.6L277.7,416.3L279.3,419.4L277.8,424.6L275.8,425.9L274.4,425.8L275.7,432.2L274.5,433.8L274.1,436.8L273.0,437.6L274.5,437.6L273.9,439.2L275.4,439.5L276.7,441.6L277.9,440.2L277.3,440.0L277.6,439.1L279.2,439.5L280.1,441.0L281.1,439.5L282.2,440.2L282.2,441.3L283.2,440.9L284.8,441.8L284.5,443.1L286.7,443.6L283.6,445.7L282.9,447.7L282.5,447.1L281.6,448.4L280.6,447.7L278.7,448.7L279.5,450.5L281.4,451.6L282.1,453.0L281.1,455.7L276.0,451.6L274.8,453.2L273.4,452.3L271.2,452.5L267.5,456.0L266.7,456.1L265.9,454.9L264.3,455.3L262.4,454.8L260.4,456.5L259.8,455.2L260.5,453.4L262.0,452.7L262.0,451.8L258.4,451.2L257.7,451.9L258.0,454.0L257.3,454.4L258.8,456.9L257.7,456.6L257.4,457.5L254.9,457.0L252.8,460.2L249.5,460.1L248.6,459.1L247.7,459.1L247.8,456.1L245.9,454.9L246.9,446.5L246.0,444.9L246.0,440.4L244.1,439.2L241.7,440.3L240.3,437.7L241.2,437.2L242.2,433.9L243.2,433.2L242.5,431.8L243.7,431.3L241.2,430.0L238.3,430.3L237.7,429.5L238.1,427.9L240.8,426.2L239.3,424.7L235.8,425.5L236.3,427.8L234.2,428.8L233.8,428.2L230.9,428.2L227.1,429.6L227.2,427.3L229.2,425.0L226.4,424.5Z","lp":[259.2,432.7]},"Greater London":{"d":"M373.6,514.5L375.4,510.2L374.4,506.7L375.7,504.4L373.9,500.0L374.1,496.4L376.9,498.5L378.1,497.6L380.6,498.3L386.6,495.1L387.4,495.6L390.7,494.9L391.1,493.3L393.7,492.6L394.3,491.7L395.2,492.3L397.0,489.6L401.0,489.1L407.5,490.1L407.6,494.0L410.1,494.5L410.1,495.9L413.6,498.4L418.1,496.2L422.4,495.9L424.0,495.1L426.9,497.6L426.3,498.4L427.3,498.6L428.8,502.4L430.4,502.2L432.0,505.0L427.3,506.1L427.2,507.7L426.5,507.7L426.0,506.6L425.3,507.6L425.7,508.8L424.7,509.0L424.9,509.8L423.7,510.9L422.0,511.2L421.3,509.3L417.7,507.8L415.7,508.4L413.1,510.3L410.3,510.2L409.5,509.3L408.6,509.6L408.4,511.7L407.2,511.3L406.8,509.3L404.0,509.8L404.6,510.2L406.4,509.5L406.7,511.0L407.8,512.6L409.1,511.5L409.0,509.7L410.4,510.8L413.0,510.8L414.3,510.5L415.3,509.0L417.2,508.7L420.2,509.4L421.7,511.9L424.3,512.1L423.2,514.9L421.1,516.2L420.6,517.8L420.0,517.7L419.6,520.2L420.5,521.8L419.5,521.9L419.9,524.4L418.9,527.3L417.7,527.3L417.6,528.9L415.4,530.5L415.5,533.1L412.5,533.2L411.8,531.6L410.6,533.3L409.6,529.2L406.8,528.2L405.9,530.0L404.0,530.4L403.2,532.5L400.9,534.1L400.0,532.6L398.7,532.6L398.5,530.3L395.7,528.0L394.0,529.5L393.4,528.8L394.2,528.0L393.8,526.5L392.2,525.4L392.2,524.0L391.1,524.1L389.3,526.0L388.1,529.1L386.4,529.8L386.4,527.6L387.9,524.3L387.2,522.6L386.4,522.8L384.2,520.6L382.5,521.0L381.9,519.5L377.4,517.9L377.2,515.8Z","lp":[390.9,511.6]},"Wales":{"d":"M41.5,466.7L42.4,465.3L41.9,464.1L43.3,463.2L42.8,462.1L42.1,462.2L42.7,461.5L45.9,460.9L47.6,459.4L49.4,459.2L50.4,457.2L53.3,457.5L54.2,456.1L56.6,456.2L56.9,455.4L58.1,455.5L58.6,453.7L57.6,452.7L59.2,451.6L58.1,450.3L59.4,448.7L62.8,449.9L64.8,449.4L65.1,450.5L66.2,450.9L65.4,450.7L64.7,451.7L66.1,452.8L69.7,451.3L70.5,448.6L72.6,450.5L76.6,450.7L75.2,449.9L75.5,447.1L78.7,446.3L81.0,444.4L82.3,442.0L81.8,441.3L83.1,439.9L85.9,441.5L86.2,438.7L89.3,437.8L93.3,438.0L94.4,437.3L95.9,438.6L97.7,438.5L101.1,435.8L101.4,434.6L102.3,435.0L104.0,433.9L107.7,429.8L109.5,430.5L111.3,430.2L119.4,424.9L124.2,418.5L127.9,410.1L129.5,402.5L130.8,400.9L130.6,395.3L131.6,396.0L134.3,395.4L135.0,396.4L134.6,395.1L136.1,395.5L135.5,395.0L138.6,392.4L130.1,394.3L126.0,386.3L128.4,380.1L131.0,378.1L131.6,374.9L131.6,376.1L133.9,374.4L134.3,375.2L135.7,372.9L133.5,372.7L132.6,374.3L131.0,374.7L125.1,364.4L127.1,362.3L126.7,362.4L127.4,360.1L125.8,354.9L130.0,354.3L130.8,352.5L131.7,352.6L132.3,351.5L130.5,351.8L128.6,353.3L127.0,351.3L125.4,353.5L120.9,352.0L114.4,352.9L113.6,354.7L109.5,354.2L108.8,355.7L105.7,356.3L103.4,358.2L103.7,359.3L101.4,361.7L102.4,365.2L100.5,365.3L99.6,367.0L98.6,366.0L99.1,364.4L94.8,361.6L91.8,364.2L90.7,363.5L88.8,364.8L86.7,363.8L85.8,366.0L83.6,364.3L86.7,360.0L86.5,358.1L88.6,357.5L90.4,355.5L91.9,352.4L93.1,352.5L94.3,350.5L97.3,349.0L97.6,347.9L98.1,349.1L100.8,348.9L104.1,346.1L106.5,342.7L108.4,342.7L112.2,339.0L113.3,337.1L113.6,333.9L113.0,330.0L113.6,329.2L114.9,329.2L113.9,330.1L114.9,332.3L115.7,330.9L115.2,330.9L115.4,328.6L117.4,327.3L117.9,327.8L117.8,326.9L120.1,323.9L122.3,322.6L123.2,319.6L125.8,318.6L128.5,316.8L128.9,317.3L130.5,316.9L131.0,318.1L147.1,310.9L148.3,312.3L147.2,308.2L145.4,305.9L148.0,306.1L149.0,307.8L151.9,307.3L152.5,308.3L154.2,308.9L154.7,310.4L156.3,311.2L163.0,311.7L169.4,308.9L169.8,309.5L171.5,307.7L179.3,305.2L182.9,304.9L182.7,306.4L183.6,307.5L185.3,308.8L185.9,308.4L186.3,309.5L190.0,311.9L196.1,317.9L198.5,319.2L197.1,317.5L197.9,317.5L196.1,316.0L201.0,316.7L208.5,323.8L208.1,325.8L203.7,327.7L204.6,328.1L205.6,330.1L209.1,332.3L211.1,331.4L209.7,334.6L211.4,335.8L211.1,336.6L212.4,338.2L211.7,338.4L212.5,338.9L211.8,339.8L212.7,340.8L212.4,342.4L213.5,343.0L214.0,345.3L216.2,346.1L218.5,345.6L219.1,346.5L221.3,346.9L220.7,348.3L221.4,349.8L221.1,353.3L219.3,353.4L216.4,356.6L213.6,351.3L210.7,350.8L210.4,350.2L207.7,351.7L205.6,350.3L204.6,348.4L204.1,349.3L202.3,349.7L200.5,352.6L197.7,353.0L196.4,352.5L195.1,356.5L193.0,356.9L193.7,357.4L192.6,358.2L194.2,359.4L191.8,361.6L192.6,362.2L191.4,364.7L191.4,366.0L192.4,366.2L191.9,367.4L194.7,368.7L196.8,367.4L196.5,368.4L197.3,370.1L199.4,370.0L200.3,371.0L201.5,370.6L201.9,371.6L201.2,372.4L203.1,373.3L203.2,374.4L204.9,374.6L205.2,376.4L204.0,376.5L204.0,375.3L202.5,375.9L201.2,375.4L201.0,377.4L199.3,379.1L199.9,380.9L199.0,384.0L196.9,384.6L198.4,385.8L197.4,386.0L196.1,388.1L196.3,389.3L194.4,390.8L192.9,390.8L194.7,395.7L193.0,396.5L193.3,397.2L196.4,396.5L196.4,394.6L201.4,392.0L202.7,394.5L202.0,398.2L200.1,397.8L200.2,400.2L194.7,400.4L189.9,403.1L188.8,402.9L186.1,406.6L187.2,408.9L189.9,410.3L191.5,412.7L194.5,414.0L197.9,417.2L199.3,417.7L203.7,416.6L205.1,417.2L204.2,419.4L201.9,420.3L201.0,424.9L205.3,426.1L203.4,427.2L201.5,426.6L199.4,427.4L198.5,428.2L198.8,429.5L196.8,429.8L196.8,432.3L194.8,433.4L195.3,435.5L193.4,437.7L194.9,438.7L196.0,437.8L196.7,438.6L195.3,439.9L192.4,440.5L191.9,441.6L194.4,442.9L194.4,444.2L193.2,444.5L192.9,447.2L195.3,450.3L195.6,451.5L194.7,453.4L196.8,457.8L199.6,460.7L200.8,464.1L202.9,464.1L203.2,466.6L209.7,463.5L212.0,464.8L211.2,465.6L212.2,465.3L212.6,466.6L217.2,469.5L216.5,471.1L219.1,474.4L220.5,473.1L220.8,474.0L222.1,473.5L222.3,474.7L224.2,474.6L225.3,475.6L224.6,476.0L224.6,477.3L223.3,478.2L223.9,479.2L223.2,482.0L224.4,483.7L223.7,485.6L222.6,486.3L223.9,489.0L222.9,489.6L223.8,490.4L223.6,491.8L224.7,492.5L222.9,493.6L224.0,493.6L223.1,495.4L223.8,495.7L224.5,498.4L223.7,499.8L221.9,500.4L220.7,502.7L217.6,503.1L207.3,508.1L206.1,507.7L206.5,507.0L204.1,507.8L202.0,506.6L202.6,505.6L201.4,506.2L201.1,507.6L192.0,512.7L189.1,517.5L188.7,521.9L187.5,522.5L184.9,522.1L181.8,523.8L178.9,523.2L176.7,524.5L172.3,524.4L171.6,523.6L161.7,521.9L159.1,517.5L156.2,514.9L157.2,513.7L156.3,514.2L154.9,513.0L153.4,513.7L150.6,513.0L148.7,510.2L146.1,502.9L144.2,502.3L145.5,502.6L142.0,497.8L142.7,496.8L137.0,498.4L136.5,497.7L134.5,497.8L132.0,499.2L131.5,501.3L133.1,502.6L132.8,503.0L130.8,502.6L129.8,503.1L129.0,502.4L127.0,503.7L123.8,502.2L124.1,501.5L120.6,503.0L120.8,505.2L117.9,504.5L116.8,505.7L112.1,502.8L110.1,502.6L111.5,501.1L110.2,497.4L112.3,496.7L114.7,493.3L115.8,493.3L115.1,493.5L115.6,493.9L114.9,496.0L115.6,495.1L115.6,495.6L117.0,495.5L116.6,494.7L118.7,495.9L120.2,495.6L119.9,496.7L120.6,496.1L120.3,495.6L120.9,495.6L120.7,495.0L122.4,495.2L122.2,494.1L124.4,493.0L128.0,492.8L126.1,492.0L127.4,490.9L126.5,489.8L127.1,490.0L128.3,487.9L126.2,489.1L126.2,491.2L126.1,490.7L125.6,491.0L126.1,491.8L122.8,492.4L122.5,491.6L121.6,492.7L120.0,491.5L119.2,489.8L117.0,489.2L112.2,489.9L113.5,490.4L111.6,491.0L107.8,487.8L105.7,483.6L108.8,485.2L111.0,484.5L109.8,483.5L106.8,483.0L106.1,481.2L106.9,477.5L109.4,476.1L107.1,476.5L104.2,480.8L100.2,479.3L100.4,480.3L103.2,482.1L100.0,483.5L93.4,482.1L85.3,483.4L83.8,485.0L84.9,486.8L83.7,487.9L83.3,489.2L83.9,489.5L82.4,490.9L82.5,491.7L79.5,491.4L79.4,492.5L78.0,492.6L77.6,493.4L75.5,492.2L72.2,491.9L72.1,492.8L69.5,494.0L69.5,495.9L67.8,495.7L67.5,497.2L65.9,497.2L64.1,495.6L61.8,495.7L58.3,494.3L59.0,492.1L58.1,489.5L54.1,488.4L54.0,487.3L55.5,486.2L57.5,486.7L56.7,487.1L57.6,487.8L59.4,488.1L59.2,486.1L60.9,486.1L62.2,487.0L64.0,486.9L63.7,487.4L64.4,487.8L64.3,487.0L66.5,485.3L63.8,485.7L61.5,484.7L61.6,484.2L56.9,484.6L55.6,482.7L56.4,480.9L55.7,481.3L54.8,484.1L54.2,483.3L51.9,483.5L51.2,482.0L51.2,484.3L52.5,484.9L51.9,485.0L51.9,486.5L50.6,487.3L49.7,486.2L49.9,484.1L45.4,480.6L48.4,481.2L49.0,478.8L50.2,479.1L52.1,477.1L54.9,477.7L55.7,477.0L56.2,473.1L54.1,467.0L51.0,467.2L50.3,466.0L49.7,466.4L46.7,465.6L44.1,465.8L43.1,466.8L43.0,466.3ZM127.6,361.9L127.4,362.1L127.8,362.2ZM118.5,496.6L118.0,496.2L118.5,496.6ZM116.9,496.0L116.5,496.0L117.1,496.5ZM107.7,355.3L108.4,355.4L108.1,354.7ZM66.7,485.3L70.3,485.2L71.2,484.0L71.0,482.2L70.1,481.6L70.7,482.5L70.0,484.8ZM69.9,481.5L70.9,478.1L69.3,477.9L70.3,479.1ZM125.7,318.5L125.1,318.0L123.0,319.0L121.9,322.3L115.1,326.7L115.0,326.1L114.0,326.1L114.0,325.1L113.7,326.8L112.6,327.7L114.3,328.6L109.7,326.5L108.6,327.4L109.1,326.5L108.3,324.3L110.4,323.7L110.7,321.4L106.7,325.2L105.4,322.2L103.9,322.7L103.8,321.6L102.8,321.5L103.3,319.3L99.6,314.4L99.7,312.6L97.5,310.8L98.3,310.3L97.9,309.9L96.9,310.5L96.9,311.5L98.3,311.9L97.8,312.8L99.2,312.8L98.5,313.1L99.5,314.9L96.8,315.4L95.9,314.8L96.1,313.6L95.0,312.1L95.6,311.0L93.4,310.0L91.2,310.4L91.6,308.7L90.4,307.7L91.5,306.0L92.8,306.5L95.4,305.4L93.8,306.6L95.2,306.7L94.9,307.6L95.5,307.3L96.1,308.4L97.8,308.6L97.9,309.9L98.5,310.1L101.0,308.3L99.3,308.9L99.4,307.0L98.1,305.8L100.1,300.6L99.0,297.3L101.9,297.1L103.2,296.0L103.3,296.8L104.5,296.6L105.4,295.4L107.2,296.5L107.2,295.4L109.0,294.7L110.5,295.7L112.7,295.5L113.5,296.6L114.7,296.0L115.0,296.7L115.5,296.3L117.7,297.1L118.1,296.4L119.2,299.4L117.5,302.1L118.6,301.6L118.4,301.0L119.4,302.7L121.7,303.1L121.4,305.0L122.3,307.5L123.2,308.1L122.5,309.7L123.2,310.5L127.3,309.2L128.9,307.7L134.2,308.8L130.0,314.9L126.0,317.1ZM101.7,315.9L101.8,316.5L102.3,315.8Z"},"Scotland":{"d":"M202.5,-5.0L198.5,-2.1L197.0,3.8L194.3,3.7L193.4,4.5L191.2,4.1L189.4,4.8L187.7,6.9L186.9,6.3L186.0,7.2L183.1,7.3L183.3,9.9L180.5,7.9L179.9,8.1L180.2,8.5L179.3,8.2L178.9,7.1L173.5,5.7L172.0,3.8L171.1,3.7L170.8,5.2L169.9,5.1L169.3,4.0L165.1,4.8L158.6,-1.5L160.0,1.5L162.2,3.0L162.4,6.5L163.0,7.2L165.3,6.2L164.8,7.1L165.4,6.8L165.7,8.9L170.5,8.0L175.5,10.2L183.4,11.7L185.8,10.4L188.7,13.4L189.1,12.6L191.3,13.0L193.9,12.1L194.1,12.9L195.2,13.0L196.3,11.8L200.4,15.7L202.8,16.8L207.0,16.2L209.9,14.3L213.0,13.8L214.8,11.6L214.6,9.9L217.4,9.4L216.2,8.5L216.1,6.9L217.9,6.5L219.3,4.2L229.0,4.6L231.5,5.9L231.9,7.6L233.8,8.7L233.3,9.4L233.7,10.5L233.2,9.8L233.0,10.8L232.4,10.6L232.8,11.5L233.9,11.5L234.2,9.9L235.6,11.6L236.3,10.7L238.2,10.6L238.4,11.4L242.3,12.7L243.9,14.6L245.1,15.1L245.5,16.2L249.5,19.2L253.9,19.9L256.1,18.9L259.1,20.7L261.5,20.7L261.7,23.5L263.6,25.3L264.4,25.1L264.6,25.9L265.3,25.7L265.7,28.9L267.9,32.5L264.7,34.5L264.7,37.9L263.3,38.2L262.7,40.5L261.1,40.5L260.6,42.2L259.0,42.7L259.6,44.1L256.4,47.5L256.4,48.8L254.5,50.1L255.3,51.4L250.9,50.7L249.0,52.3L249.7,53.0L250.7,52.7L250.2,53.6L251.9,55.5L251.9,58.1L254.9,60.9L255.6,66.0L257.3,68.2L257.4,69.8L259.6,70.6L258.2,71.3L257.8,73.2L255.5,75.0L253.6,74.5L250.3,77.4L248.8,77.3L248.3,78.2L249.2,80.3L248.2,81.1L248.7,81.8L246.1,83.8L244.8,83.9L243.8,82.7L240.0,83.1L237.1,86.7L234.6,87.2L233.7,89.5L231.4,91.0L230.3,93.4L229.1,93.6L231.2,95.1L230.0,95.3L229.9,97.7L227.7,97.9L225.3,103.2L220.1,106.7L217.5,107.0L217.3,108.5L213.5,111.8L212.8,113.7L210.1,114.6L210.3,115.7L208.9,116.8L203.0,116.4L202.8,117.0L204.5,118.2L203.0,121.2L203.3,122.4L200.2,124.9L199.1,124.6L196.5,126.2L193.0,124.5L190.6,125.6L190.3,125.0L189.0,125.3L188.8,125.8L185.1,124.3L182.4,125.1L179.9,124.7L178.5,122.5L175.6,125.4L172.6,125.5L170.2,123.8L169.0,120.2L168.3,121.8L169.2,123.7L167.7,124.3L168.7,124.4L168.2,129.9L169.3,130.1L169.9,131.9L167.7,134.6L167.7,135.7L161.1,134.7L162.3,133.4L159.3,134.7L157.1,137.1L155.3,137.6L153.3,134.1L152.9,136.6L154.1,138.4L153.0,138.2L151.8,135.9L150.7,136.3L152.2,138.3L151.1,137.8L150.5,138.3L152.7,140.6L152.4,141.1L142.4,146.7L141.1,146.0L138.6,146.4L138.1,145.9L137.4,144.8L138.6,141.3L138.1,140.3L137.2,141.5L137.3,139.6L135.7,141.4L135.7,145.0L134.8,145.4L135.7,145.9L135.4,146.8L133.7,145.4L133.6,144.5L132.5,145.6L131.2,145.0L129.9,141.9L128.1,141.2L127.5,139.9L128.0,138.7L127.2,138.3L127.4,137.3L128.6,135.3L127.2,135.4L125.1,138.5L121.6,137.3L118.5,135.4L117.2,133.7L116.3,129.8L115.9,131.3L116.4,131.9L114.3,132.9L114.1,133.8L114.7,134.3L115.0,139.2L118.8,141.0L119.6,142.6L119.2,143.5L117.8,143.3L118.3,144.9L117.6,145.5L118.5,146.0L117.7,151.0L118.7,152.6L115.8,156.0L110.0,153.3L106.3,150.6L106.2,149.4L104.5,148.8L102.8,144.4L98.4,141.7L96.1,139.0L91.7,137.9L89.3,133.9L88.2,134.3L86.8,133.4L87.1,134.8L81.5,137.4L79.8,140.5L82.3,147.4L82.9,152.1L85.3,154.4L84.1,157.5L84.4,159.0L86.0,159.4L84.5,159.7L81.5,158.5L78.9,156.1L78.5,153.2L80.1,152.1L79.0,150.1L79.6,149.0L77.4,148.1L77.9,146.5L76.8,145.8L76.5,142.7L74.5,141.6L73.9,139.6L68.6,134.8L66.0,127.5L67.1,118.6L68.2,117.2L69.4,117.4L71.9,116.3L74.1,122.0L73.2,122.5L73.9,126.8L75.8,128.9L78.0,128.4L78.2,125.7L74.5,115.6L75.1,112.8L78.3,108.2L79.4,102.7L82.7,100.5L84.8,96.8L88.2,93.7L88.0,91.7L90.0,87.6L89.6,82.9L94.2,79.2L94.7,74.7L95.8,73.0L98.4,71.2L102.6,70.7L102.9,67.3L104.0,66.5L104.6,64.2L103.9,61.9L104.5,62.7L104.5,62.2L100.7,58.6L102.3,58.5L102.5,56.1L100.8,52.8L96.7,48.8L94.2,49.0L93.9,48.1L92.5,47.9L92.9,47.0L90.1,42.9L87.5,41.1L87.8,38.5L88.9,37.8L88.3,36.9L89.6,37.6L89.7,35.7L90.7,35.9L90.9,34.7L90.9,32.3L89.2,27.9L89.0,19.6L90.6,17.8L90.0,17.1L90.3,14.1L94.2,12.0L95.1,12.7L95.4,12.1L96.7,12.3L98.7,14.2L106.8,16.1L109.8,15.6L103.6,12.9L102.6,11.4L101.5,11.8L101.6,10.9L102.5,10.8L101.7,8.9L96.3,6.3L94.0,-0.8L93.4,2.3L95.9,7.8L97.3,7.9L97.5,9.3L93.9,9.5L92.2,8.9L90.8,1.8L93.7,-5.0ZM231.7,11.1L231.9,10.5L231.6,11.1ZM85.0,133.9L85.6,133.8L85.3,133.5ZM89.2,-4.9L91.2,-2.0L88.6,1.9L89.3,9.4L85.4,7.0L85.4,8.7L88.6,11.3L86.9,13.9L83.7,22.8L79.6,21.6L78.5,12.5L76.3,10.2L75.4,6.2L74.9,7.4L75.6,10.2L77.6,14.0L77.7,18.5L75.6,18.0L71.5,14.3L70.9,9.2L70.0,15.0L67.4,18.4L69.3,22.8L69.4,25.9L66.2,23.2L64.4,23.4L64.0,22.4L62.7,22.9L62.8,20.1L60.7,18.9L60.5,17.7L62.4,11.4L61.3,9.8L61.9,6.6L64.3,3.9L65.6,0.4L70.8,-5.0ZM67.5,-4.2L65.9,-3.3L64.3,-0.3L62.6,-1.1L63.0,-0.0L62.0,0.8L61.6,3.9L60.8,3.6L58.8,5.7L57.3,5.7L56.4,4.2L56.4,2.3L55.7,2.0L54.7,9.2L56.0,12.0L56.3,17.7L57.3,18.6L56.7,18.5L57.6,20.6L56.6,21.3L58.3,21.6L60.9,25.6L62.3,30.6L61.3,32.6L59.9,32.4L57.1,33.8L53.3,38.6L53.3,40.8L50.9,45.7L52.1,53.2L51.5,53.7L51.4,52.5L50.2,52.8L49.8,58.2L48.9,58.5L48.3,62.9L46.0,65.1L45.5,68.7L43.5,69.7L42.2,69.4L43.2,70.8L45.3,70.5L46.8,73.5L47.0,76.9L44.1,80.9L41.4,82.6L36.1,82.2L33.9,83.8L31.7,84.1L28.9,82.5L29.7,72.6L32.8,69.1L34.6,68.9L35.7,58.5L36.4,57.2L35.8,52.6L37.4,51.2L38.9,46.2L39.7,42.3L39.0,40.7L42.7,37.8L46.2,31.6L47.2,31.6L52.1,27.8L55.0,22.1L54.4,22.0L49.0,28.7L43.3,32.0L44.2,30.4L43.1,29.6L43.8,28.5L41.9,29.2L40.4,27.7L40.7,23.0L44.1,16.3L47.0,12.8L44.6,13.4L40.1,17.9L39.7,15.0L45.5,5.1L47.3,4.0L47.8,2.5L45.8,3.8L47.7,1.3L45.2,2.9L45.9,1.6L44.3,2.8L44.9,3.6L43.3,6.5L41.9,7.2L43.1,4.6L42.4,5.3L41.0,7.7L41.1,8.3L42.1,7.9L41.2,9.5L39.1,12.7L39.1,10.9L40.4,9.1L38.2,10.8L42.2,2.9L43.6,2.2L43.9,-0.4L47.1,-4.6L49.1,-4.4L49.2,-3.2L50.9,-2.0L51.5,-2.8L50.5,-2.5L50.5,-3.6L49.5,-3.5L50.3,-5.0L67.6,-5.0ZM39.9,10.2L40.4,10.6L41.2,9.5L41.1,9.4ZM68.7,17.7L71.3,15.2L72.7,15.7L75.4,19.0L77.5,20.4L76.7,22.3L78.5,22.9L78.6,25.1L80.7,24.7L80.7,28.5L81.8,33.0L79.9,34.4L81.5,37.3L79.9,38.2L78.4,36.9L78.0,34.1L76.1,31.9L74.4,32.4L74.2,28.4L73.4,29.0L73.2,27.8L74.2,24.3L71.7,23.4ZM56.3,49.5L58.5,42.1L61.0,41.0L61.7,39.2L63.5,39.6L63.2,38.4L64.9,37.6L68.9,39.9L71.3,42.7L73.1,50.4L71.0,53.2L74.1,54.7L75.6,56.9L72.7,59.2L72.8,60.0L75.7,61.7L74.6,63.7L75.1,67.8L73.2,69.4L71.6,68.9L67.9,69.8L64.4,69.0L60.6,66.0L59.9,62.3L58.2,61.2L59.5,56.5ZM13.8,18.1L14.6,15.0L18.7,10.0L25.7,9.4L30.0,7.2L29.6,5.9L27.8,8.0L27.2,6.8L24.2,8.8L20.9,6.9L20.1,7.2L24.0,0.2L28.5,-3.2L32.1,-5.0L39.6,-5.0L34.7,3.1L33.7,3.5L31.7,7.8L30.7,8.1L30.0,11.4L27.8,15.2L27.9,16.9L27.0,18.1L27.4,16.8L26.4,16.8L25.9,19.3L25.0,18.7L23.8,19.2L22.7,22.8L23.4,23.8L21.6,27.4L17.1,26.8L15.4,25.5L14.2,22.7L14.4,19.1ZM-4.7,18.5L-0.6,15.1L-2.0,21.3L-1.4,22.7L-0.5,22.8L-0.9,21.5L0.8,17.9L0.4,17.1L3.1,16.3L7.9,11.6L9.4,11.8L12.4,10.6L12.7,12.5L11.7,16.0L13.0,20.2L13.0,24.6L14.0,28.1L16.2,30.3L15.7,32.7L17.1,34.8L16.3,36.4L16.4,38.2L17.2,38.0L16.8,39.2L17.4,39.3L15.5,40.6L14.9,41.9L14.0,41.3L13.7,43.7L13.0,43.0L8.9,45.3L7.9,44.7L6.6,45.4L6.1,44.3L4.7,44.5L4.9,45.7L2.9,48.6L1.8,48.9L1.1,50.0L-1.6,49.5L-1.8,48.7L-3.3,48.4L-2.7,45.2L-0.7,42.1L1.2,42.2L2.3,41.3L0.7,36.3L-0.6,34.3L-2.6,34.5L-1.8,31.7L2.7,29.5L3.4,27.8L2.9,27.2L-2.4,26.9L-5.0,32.2Z"}};
+const LABEL_FIX = {
+  "Merseyside":{x:207,y:297},
+  "Lancashire":{x:226,y:244},
+  "Greater Manchester":{x:248,y:289},
+  "Isle of Wight":{x:326,y:607},
+  "Tyne and Wear":{x:302,y:128},
+  "East Riding of Yorkshire":{x:364,y:247},
+  "Bristol":{x:215,y:516,a:"end"},
+  "Rutland":{x:361,y:386},
+  "Greater London":{x:403,y:512},
+  "Wales":{x:112,y:410}
+};
+const SHORT = {"Greater London":"London","Greater Manchester":"Gtr Manchester","West Midlands":"W. Midlands","East Riding of Yorkshire":"East Riding","Tyne and Wear":"Tyne & Wear","Northamptonshire":"Northants","Buckinghamshire":"Bucks","Isle of Wight":"IoW","Worcestershire":"Worcs","Herefordshire":"Hereford.","Gloucestershire":"Gloucs","Leicestershire":"Leics","Nottinghamshire":"Notts","Bedfordshire":"Beds","Hertfordshire":"Herts","Warwickshire":"Warks","Cambridgeshire":"Cambs","Staffordshire":"Staffs","Oxfordshire":"Oxon","Derbyshire":"Derbys","Lincolnshire":"Lincs"};
+const LEAGUES = ["Premier League","Championship","League One","League Two"];
+const LEAGUE_SHORT = {"Premier League":"Premier League","Championship":"Championship","League One":"League One","League Two":"League Two"};
+const STORE_KEY = 'ticked-clubs-92';
+const KINDS = [
+  {k:'m', short:'M', label:'Men’s game'},
+  {k:'e', short:'E', label:'Concert / event'},
+  {k:'w', short:'W', label:'Women’s game / other'},
+];
+
+// ---------------- STATE ----------------
+let ticked = {};
+let currentTab = "checklist";
+let selectedCounty = null;
+
+async function loadState(){
+  let raw = null;
+  try{ raw = localStorage.getItem(STORE_KEY); }catch(e){}
+  if(!raw && window.storage && window.storage.get){
+    try{ const r = await window.storage.get(STORE_KEY,false); if(r && r.value) raw = r.value; }catch(e){}
+  }
+  try{ ticked = raw ? JSON.parse(raw) : {}; }catch(e){ ticked = {}; }
+  // migrate older saves: true or a timestamp meant a men’s game
+  let migrated = false;
+  Object.keys(ticked).forEach(id=>{
+    const v = ticked[id];
+    if(v && typeof v !== 'object'){ ticked[id] = {m: typeof v==='number' ? v : Date.now()}; migrated = true; }
+    else if(!v) delete ticked[id];
+  });
+  if(migrated) saveState();
+  render();
+}
+function saveState(){
+  const v = JSON.stringify(ticked);
+  try{ localStorage.setItem(STORE_KEY, v); }catch(e){}
+  if(window.storage && window.storage.set){ window.storage.set(STORE_KEY, v, false).catch(()=>{}); }
+}
+function isTicked(id){ const v=ticked[id]; return !!v && KINDS.some(K=>v[K.k]); }
+function hasKind(id,k){ return !!(ticked[id] && ticked[id][k]); }
+function toggle(id, k){
+  const v = ticked[id] || (ticked[id] = {});
+  if(v[k]) delete v[k]; else v[k] = Date.now();
+  if(!KINDS.some(K=>v[K.k])) delete ticked[id];
+  saveState(); render();
+}
+function latestTime(id){ const v=ticked[id]||{}; return Math.max(0,...KINDS.map(K=>v[K.k]||0)); }
+function tickBoxes(c, cls){
+  return `<div class="${cls||'ticks'}">${KINDS.map(K=>`
+    <label title="${K.label}"><input type="checkbox" ${hasKind(c.id,K.k)?'checked':''} data-id="${c.id}" data-kind="${K.k}" aria-label="${c.n}: ${K.label}" /></label>`).join('')}</div>`;
+}
+function bindTicks(root){
+  root.querySelectorAll('input[type="checkbox"][data-kind]').forEach(inp=> inp.addEventListener('change', ()=> toggle(inp.dataset.id, inp.dataset.kind)));
+}
+let resetArmed = null;
+function clearAll(){
+  const btn = document.getElementById('resetBtn');
+  if(!resetArmed){
+    btn.textContent = 'Tap again to clear every tick';
+    btn.classList.add('armed');
+    resetArmed = setTimeout(()=>{ resetArmed=null; btn.textContent='Clear all ticks'; btn.classList.remove('armed'); }, 3500);
+    return;
+  }
+  clearTimeout(resetArmed); resetArmed=null;
+  btn.textContent='Clear all ticks'; btn.classList.remove('armed');
+  ticked = {}; saveState(); render();
+}
+
+// ---------------- STATS ----------------
+function stats(){
+  const done = CLUBS.filter(c=>isTicked(c.id));
+  const leagues = LEAGUES.map(l=>{
+    const all = CLUBS.filter(c=>c.l===l);
+    return {l, total:all.length, done:all.filter(c=>isTicked(c.id)).length};
+  });
+  const counties = {};
+  CLUBS.forEach(c=>{ (counties[c.c] ||= {total:0,done:0}).total++; if(isTicked(c.id)) counties[c.c].done++; });
+  const cList = Object.entries(counties);
+  const complete = cList.filter(([,v])=>v.done===v.total).map(([k])=>k);
+  const started = cList.filter(([,v])=>v.done>0).length;
+  const latest = done.filter(c=>latestTime(c.id)>0).sort((a,b)=>latestTime(b.id)-latestTime(a.id))[0] || null;
+  const kinds = KINDS.map(K=>({...K, count: CLUBS.filter(c=>hasKind(c.id,K.k)).length}));
+  const bestLeague = leagues.slice().sort((a,b)=>(b.done/b.total)-(a.done/a.total))[0];
+  return {done:done.length, total:CLUBS.length, pct:Math.round(done.length/CLUBS.length*100), leagues, complete, started, countyTotal:cList.length, latest, bestLeague, kinds};
+}
+function verdict(n){
+  if(n===0) return 'Not started yet. The first ground is the best one.';
+  if(n===92) return 'The Complete 92. Every ground done.';
+  if(n>=80) return 'The home straight.';
+  if(n>=46) return 'Past halfway.';
+  if(n>=23) return 'A quarter of the way round.';
+  if(n>=10) return 'Into double figures.';
+  return 'Off the mark.';
+}
+
+// ---------------- RENDER: scoreboard + checklist ----------------
+function renderScoreboard(){
+  const s = stats();
+  document.getElementById('tickedCount').textContent = s.done;
+  document.getElementById('pctText').textContent = s.pct + '% complete';
+  document.getElementById('barFill').style.width = s.pct + '%';
+  document.getElementById('leagueChips').innerHTML = s.leagues.map(L=>`
+    <div class="chip"><b>${L.done}/${L.total}</b>${LEAGUE_SHORT[L.l]}<div class="mini"><i style="width:${L.done/L.total*100}%"></i></div></div>`).join('');
+}
+function renderChecklist(){
+  const container = document.getElementById('leagueContainer');
+  const q = (document.getElementById('searchBox').value || '').toLowerCase().trim();
+  container.innerHTML = '';
+  LEAGUES.forEach(lg=>{
+    let clubs = CLUBS.filter(c=>c.l===lg);
+    if(q) clubs = clubs.filter(c=> c.n.toLowerCase().includes(q) || c.s.toLowerCase().includes(q) || c.c.toLowerCase().includes(q));
+    if(!clubs.length) return;
+    const doneCount = CLUBS.filter(c=>c.l===lg && isTicked(c.id)).length;
+    const totalCount = CLUBS.filter(c=>c.l===lg).length;
+    const div = document.createElement('div');
+    div.className = 'league';
+    div.innerHTML = `
+      <div class="league-head"><h2>${lg}</h2><span class="tally">${doneCount} / ${totalCount}</span></div>
+      <div class="tick-head"><span>Ground</span>${KINDS.map(K=>`<span>${K.short}</span>`).join('')}</div>
+      <div class="league-body">
+        ${clubs.map(c=>`
+          <div class="club-row ${isTicked(c.id)?'ticked':''}">
+            <div class="club-info">
+              <div class="club-name ${isTicked(c.id)?'done':''}">${c.n}</div>
+              <div class="club-stadium">${c.s}</div>
+            </div>
+            <div class="club-county">${c.c}</div>
+            ${tickBoxes(c)}
+          </div>`).join('')}
+      </div>`;
+    container.appendChild(div);
+  });
+  bindTicks(container);
+}
+
+// ---------------- COLOUR ----------------
+function lerpColor(a,b,t){
+  const p=h=>[1,3,5].map(i=>parseInt(h.substr(i,2),16));
+  const A=p(a),B=p(b);
+  return `rgb(${A.map((v,i)=>Math.round(v+(B[i]-v)*t)).join(',')})`;
+}
+function bareColor(){ return getComputedStyle(document.documentElement).getPropertyValue('--bare').trim() || '#5a4a34'; }
+function colorForPct(p){
+  const bare = bareColor();
+  if(p<=0) return bare;
+  if(p>=1) return '#e8b43a';
+  if(p<0.5) return lerpColor(bare.length===7?bare:'#5a4a34','#2f5b34', p/0.5);
+  return lerpColor('#2f5b34','#e8b43a',(p-0.5)/0.5);
+}
+function lum(c){
+  let r,g,b;
+  if(c.startsWith('#')){ r=parseInt(c.substr(1,2),16); g=parseInt(c.substr(3,2),16); b=parseInt(c.substr(5,2),16); }
+  else { [r,g,b]=c.match(/\d+/g).map(Number); }
+  return 0.299*r+0.587*g+0.114*b;
+}
+function countyStats(county){
+  const clubs = CLUBS.filter(c=>c.c===county);
+  const done = clubs.filter(c=>isTicked(c.id)).length;
+  return {clubs, done, total:clubs.length, pct: clubs.length? done/clubs.length : 0};
+}
+
+// ---------------- MAP ----------------
+const NS = 'http://www.w3.org/2000/svg';
+const svg = document.getElementById('mapSvg');
+const VB0 = {x:0,y:0,w:530,h:690};
+let vb = {...VB0};
+const countyEls = {};
+let mapBuilt = false;
+
+function el(tag, attrs){ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); return e; }
+
+function buildMap(){
+  const gLand = el('g',{}); const gLbl = el('g',{});
+  svg.appendChild(gLand); svg.appendChild(gLbl);
+  gLand.appendChild(el('path',{d:GEO.Scotland.d,class:'scotland'}));
+  const sc = el('text',{x:150,y:40,class:'country-lbl'}); sc.textContent='SCOTLAND'; gLbl.appendChild(sc);
+  Object.entries(GEO).forEach(([name,g])=>{
+    if(name==='Scotland') return;
+    const st = countyStats(name);
+    const p = el('path',{d:g.d,class:'county'+(st.total?' has-clubs':' empty')+(name==='Wales'?' wales':'')});
+    const t = el('title',{}); p.appendChild(t);
+    if(st.total){
+      p.setAttribute('tabindex','0'); p.setAttribute('role','button');
+      p.addEventListener('click', ()=>selectCounty(name));
+      p.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectCounty(name);} });
+    }
+    gLand.appendChild(p);
+    let lx,ly,anchor='middle';
+    const f = LABEL_FIX[name]; lx = f? f.x : g.lp[0]; ly = f? f.y : g.lp[1]; if(f&&f.a) anchor=f.a;
+    const tx = el('text',{x:lx,y:ly,class:'lbl'+(st.total?'':' empty'),'text-anchor':anchor});
+    const nm = el('tspan',{class:'nm',x:lx}); nm.textContent = name==='Wales'?'Wales':(SHORT[name]||name);
+    tx.appendChild(nm);
+    if(st.total){ const ct = el('tspan',{class:'ct',x:lx,dy:'8'}); tx.appendChild(ct); }
+    gLbl.appendChild(tx);
+    countyEls[name] = {path:p, title:t, label:tx};
+  });
+  mapBuilt = true;
+  setupZoom();
+}
+
+function paintMap(){
+  if(!mapBuilt) buildMap();
+  Object.entries(countyEls).forEach(([name,o])=>{
+    const st = countyStats(name);
+    if(st.total){
+      const fill = colorForPct(st.pct);
+      o.path.style.fill = fill;
+      const dark = lum(fill) < 140;
+      o.label.style.fill = dark ? 'var(--label-light)' : 'var(--label-dark)';
+      o.label.style.stroke = dark ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.45)';
+      o.label.style.strokeWidth = '1.6px';
+      o.label.querySelector('.ct').textContent = `${st.done}/${st.total}`;
+      o.title.textContent = `${name}: ${st.done} of ${st.total} grounds`;
+    } else {
+      o.title.textContent = `${name}: no League ground`;
+    }
+    o.path.classList.toggle('selected', selectedCounty===name);
+    if(selectedCounty===name) o.path.parentNode.appendChild(o.path);
+  });
+  updateCompact();
+}
+function selectCounty(name){
+  selectedCounty = selectedCounty===name ? null : name;
+  paintMap(); renderCountyDetail();
+  if(selectedCounty) document.getElementById('countyDetail').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function renderCountyDetail(){
+  const box = document.getElementById('countyDetail');
+  if(!selectedCounty){ box.innerHTML=''; return; }
+  const {clubs, done, total, pct} = countyStats(selectedCounty);
+  box.innerHTML = `
+    <div class="county-detail">
+      <h3>${selectedCounty}</h3>
+      <div class="cd-sub">${done} of ${total} grounds ticked (${Math.round(pct*100)}%)</div>
+      <div class="tick-head" style="padding-left:0;padding-right:0"><span>Ground</span>${KINDS.map(K=>`<span>${K.short}</span>`).join('')}</div>
+      ${clubs.map(c=>`
+        <div class="cd-club">
+          <div><div class="n ${isTicked(c.id)?'done':''}">${c.n}</div><div class="s">${c.s}</div></div>
+          ${tickBoxes(c)}
+        </div>`).join('')}
+    </div>`;
+  bindTicks(box);
+}
+
+// zoom + pan
+function applyVB(){ svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`); updateCompact(); }
+function updateCompact(){
+  const pxPerUnit = svg.clientWidth / vb.w;
+  svg.classList.toggle('compact', pxPerUnit*6 < 7.5);
+}
+function clampVB(){
+  vb.w = Math.min(VB0.w, Math.max(VB0.w/8, vb.w)); vb.h = vb.w*VB0.h/VB0.w;
+  vb.x = Math.min(VB0.w-vb.w, Math.max(0, vb.x)); vb.y = Math.min(VB0.h-vb.h, Math.max(0, vb.y));
+}
+function zoomAt(factor, cx, cy){
+  const nw = vb.w/factor;
+  vb.x = cx - (cx-vb.x)*(nw/vb.w); vb.y = cy - (cy-vb.y)*(nw/vb.w); vb.w = nw;
+  clampVB(); applyVB();
+}
+function toMap(clientX, clientY){
+  const r = svg.getBoundingClientRect();
+  return {x: vb.x + (clientX-r.left)/r.width*vb.w, y: vb.y + (clientY-r.top)/r.height*vb.h};
+}
+function setupZoom(){
+  document.getElementById('zoomIn').onclick = ()=> zoomAt(1.6, vb.x+vb.w/2, vb.y+vb.h/2);
+  document.getElementById('zoomOut').onclick = ()=> zoomAt(1/1.6, vb.x+vb.w/2, vb.y+vb.h/2);
+  document.getElementById('zoomReset').onclick = ()=>{ vb={...VB0}; applyVB(); };
+  svg.addEventListener('wheel', e=>{ e.preventDefault(); const m=toMap(e.clientX,e.clientY); zoomAt(e.deltaY<0?1.2:1/1.2, m.x, m.y); }, {passive:false});
+  const pts = new Map(); let last=null, moved=0;
+  svg.addEventListener('pointerdown', e=>{ pts.set(e.pointerId,{x:e.clientX,y:e.clientY}); moved=0; last=null; });
+  svg.addEventListener('pointermove', e=>{
+    if(!pts.has(e.pointerId)) return;
+    const prev = pts.get(e.pointerId); pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    const r = svg.getBoundingClientRect();
+    if(pts.size===1){
+      const dx=e.clientX-prev.x, dy=e.clientY-prev.y; moved += Math.abs(dx)+Math.abs(dy);
+      if(moved>4){ svg.classList.add('dragging'); if(!svg.hasPointerCapture(e.pointerId)) svg.setPointerCapture(e.pointerId); }
+      vb.x -= dx/r.width*vb.w; vb.y -= dy/r.height*vb.h; clampVB(); applyVB();
+    } else if(pts.size===2){
+      const [a,b]=[...pts.values()]; const d=Math.hypot(a.x-b.x,a.y-b.y);
+      if(last){ const m=toMap((a.x+b.x)/2,(a.y+b.y)/2); zoomAt(d/last, m.x, m.y); }
+      last=d; moved=99;
+    }
+  });
+  const end = e=>{ pts.delete(e.pointerId); if(pts.size<2) last=null; if(!pts.size) svg.classList.remove('dragging'); };
+  svg.addEventListener('pointerup', end); svg.addEventListener('pointercancel', end);
+  svg.addEventListener('click', e=>{ if(moved>4){ e.stopPropagation(); e.preventDefault(); } }, true);
+  window.addEventListener('resize', updateCompact);
+}
+
+// ---------------- SHARE ----------------
+function shareText(s){
+  const lines = [];
+  lines.push(`I’ve been to ${s.done} of the 92 Football League grounds (${s.pct}%). ${verdict(s.done)}`);
+  lines.push('');
+  s.leagues.forEach(L=> lines.push(`${L.l}: ${L.done}/${L.total}`));
+  lines.push('');
+  lines.push(s.kinds.map(K=>`${K.label}: ${K.count}`).join(' | '));
+  if(s.complete.length) lines.push(`Counties complete: ${s.complete.length} of ${s.countyTotal}${s.complete.length<=5?' ('+s.complete.join(', ')+')':''}`);
+  if(s.latest) lines.push(`Latest ground: ${s.latest.s}, ${s.latest.n}`);
+  if(s.done<92) lines.push(`${92-s.done} to go.`);
+  lines.push('#Complete92');
+  return lines.join('\n');
+}
+function renderSummary(){
+  const s = stats();
+  document.getElementById('sumVerdict').textContent = verdict(s.done);
+  document.getElementById('sumN').textContent = s.done;
+  document.getElementById('sumOf').textContent = `of 92 grounds (${s.pct}%)`;
+  document.getElementById('sumBar').style.width = s.pct+'%';
+  document.getElementById('sumLeagues').innerHTML = s.leagues.map(L=>`
+    <div class="sl-row"><span>${L.l}</span><span class="t"><i style="width:${L.done/L.total*100}%"></i></span><span class="v">${L.done}/${L.total}</span></div>`).join('');
+  const items = [
+    ['To go', s.done===92 ? 'None. You’ve done it.' : `${92-s.done} grounds`],
+    ['Counties started', `${s.started} of ${s.countyTotal}`],
+    ['Counties complete', s.complete.length ? `${s.complete.length}: ${s.complete.slice(0,4).join(', ')}${s.complete.length>4?' and more':''}` : 'None yet'],
+    ['Latest ground', s.latest ? `${s.latest.s} (${s.latest.n})` : 'Tick one to start'],
+  ];
+  s.kinds.forEach(K=> items.push([K.label, `${K.count} ${K.count===1?'ground':'grounds'}`]));
+  if(s.done) items.splice(2,0,['Strongest league', `${s.bestLeague.l}, ${Math.round(s.bestLeague.done/s.bestLeague.total*100)}%`]);
+  document.getElementById('sumGrid').innerHTML = items.map(([k,v])=>`<div class="sum-item"><strong>${k}</strong>${v}</div>`).join('');
+  document.getElementById('shareText').value = shareText(s);
+  drawCard(s);
+}
+
+let cardBlob = null;
+function drawCard(s){
+  const W=1080, H=1350, c=document.createElement('canvas'); c.width=W; c.height=H;
+  const x=c.getContext('2d');
+  for(let i=0;i<H;i+=90){ x.fillStyle = (i/90)%2 ? '#123420' : '#0c2818'; x.fillRect(0,i,W,90); }
+  x.fillStyle='#e8b43a'; x.fillRect(0,0,W,14);
+  const cond = "800 {s}px 'Arial Narrow','Helvetica Neue Condensed',Impact,sans-serif";
+  x.fillStyle='#f4efe1'; x.font=cond.replace('{s}',64); x.fillText('THE COMPLETE', 64, 120);
+  x.fillStyle='#f6cc5c'; x.fillText('92', 64+x.measureText('THE COMPLETE ').width, 120);
+  x.fillStyle='#f6cc5c'; x.font=cond.replace('{s}',230); x.fillText(String(s.done), 56, 360);
+  const nw = x.measureText(String(s.done)).width;
+  x.fillStyle='#c9c2ab'; x.font="400 44px 'Helvetica Neue',Arial,sans-serif"; x.fillText('/ 92', 72+nw, 360);
+  x.fillStyle='#f4efe1'; x.font="700 34px 'Helvetica Neue',Arial,sans-serif"; x.fillText(`${s.pct}% of grounds visited`, 64, 418);
+  x.fillStyle='#c9c2ab'; x.font="400 28px 'Helvetica Neue',Arial,sans-serif"; x.fillText(verdict(s.done), 64, 462);
+  // league bars
+  let y=540;
+  s.leagues.forEach(L=>{
+    x.fillStyle='#f4efe1'; x.font="700 28px 'Helvetica Neue',Arial,sans-serif"; x.fillText(L.l, 64, y);
+    x.fillStyle='#c9c2ab'; x.textAlign='right'; x.fillText(`${L.done}/${L.total}`, 470, y); x.textAlign='left';
+    x.fillStyle='#5a4a34'; roundRect(x,64,y+14,406,14,7); x.fill();
+    if(L.done){ const g=x.createLinearGradient(64,0,470,0); g.addColorStop(0,'#3d7a3f'); g.addColorStop(1,'#e8b43a'); x.fillStyle=g; roundRect(x,64,y+14,Math.max(14,406*L.done/L.total),14,7); x.fill(); }
+    y += 92;
+  });
+  x.fillStyle='#c9c2ab'; x.font="400 26px 'Helvetica Neue',Arial,sans-serif";
+  x.fillText(`Counties complete: ${s.complete.length} of ${s.countyTotal}`, 64, y+10);
+  if(s.done<92) x.fillText(`${92-s.done} grounds to go`, 64, y+50);
+  x.fillStyle='#f4efe1'; x.font="700 24px 'Helvetica Neue',Arial,sans-serif";
+  s.kinds.forEach((K,i)=>{ x.fillText(`${K.count}`, 64, y+110+i*36); x.fillStyle='#c9c2ab'; x.font="400 24px 'Helvetica Neue',Arial,sans-serif"; x.fillText(K.label, 64+56, y+110+i*36); x.fillStyle='#f4efe1'; x.font="700 24px 'Helvetica Neue',Arial,sans-serif"; });
+  // map
+  const scale = 1.02, ox = 500, oy = 330;
+  x.save(); x.translate(ox, oy); x.scale(scale, scale);
+  x.fillStyle='#1f3328'; x.fill(new Path2D(GEO.Scotland.d));
+  x.lineJoin='round';
+  Object.entries(GEO).forEach(([name,g])=>{
+    if(name==='Scotland') return;
+    const st = countyStats(name);
+    x.fillStyle = st.total ? colorForPctFixed(st.pct) : '#3a4752';
+    const p = new Path2D(g.d); x.fill(p);
+    x.strokeStyle='#0c2818'; x.lineWidth=0.8; x.stroke(p);
+  });
+  x.restore();
+  x.fillStyle='#c9c2ab'; x.font="400 22px 'Helvetica Neue',Arial,sans-serif"; x.textAlign='right';
+  x.fillText('#Complete92', W-48, H-40); x.textAlign='left';
+  const url = c.toDataURL('image/png');
+  document.getElementById('shareImg').src = url;
+  cardBlob = null;
+  c.toBlob(b=>{ cardBlob=b; }, 'image/png');
+}
+function colorForPctFixed(p){
+  if(p<=0) return '#5a4a34'; if(p>=1) return '#e8b43a';
+  return p<0.5 ? lerpColor('#5a4a34','#2f5b34',p/0.5) : lerpColor('#2f5b34','#e8b43a',(p-0.5)/0.5);
+}
+function roundRect(x,a,b,w,h,r){ x.beginPath(); x.moveTo(a+r,b); x.arcTo(a+w,b,a+w,b+h,r); x.arcTo(a+w,b+h,a,b+h,r); x.arcTo(a,b+h,a,b,r); x.arcTo(a,b,a+w,b,r); x.closePath(); }
+
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; clearTimeout(toast._t); toast._t=setTimeout(()=>t.textContent='',3500); }
+async function copyText(){
+  const ta = document.getElementById('shareText');
+  try{ await navigator.clipboard.writeText(ta.value); toast('Copied to clipboard.'); return true; }
+  catch(e){
+    ta.focus(); ta.select();
+    try{ if(document.execCommand('copy')){ toast('Copied to clipboard.'); return true; } }catch(_){}
+    toast('Text selected. Copy it with your keyboard or long-press.');
+    return false;
+  }
+}
+async function doShare(){
+  const text = document.getElementById('shareText').value;
+  if(navigator.share){
+    try{
+      const file = cardBlob ? new File([cardBlob],'complete-92.png',{type:'image/png'}) : null;
+      if(file && navigator.canShare && navigator.canShare({files:[file]})) await navigator.share({files:[file], text});
+      else await navigator.share({title:'The Complete 92', text});
+      toast('Shared.'); return;
+    }catch(e){ if(e && e.name==='AbortError') return; }
+  }
+  const ok = await copyText();
+  if(ok) toast('Sharing isn’t available here, so the text was copied instead.');
+}
+async function doSave(){
+  if(!cardBlob){ toast('Image still rendering. Try again in a moment.'); return; }
+  let dl = null;
+  try{ if(window.claude && window.claude.use) dl = await window.claude.use('downloads'); }catch(e){}
+  if(dl){
+    try{ await dl.save({filename:'complete-92.png', data:cardBlob}); toast('Image saved.'); }
+    catch(e){ if(e && e.code==='declined') return; toast('Saving isn’t available here. Long-press the image to save it instead.'); }
+    return;
+  }
+  try{
+    const a=document.createElement('a'); a.href=URL.createObjectURL(cardBlob); a.download='complete-92.png';
+    document.body.appendChild(a); a.click(); a.remove(); toast('Image saved.');
+  }catch(e){ toast('Long-press or right-click the image to save it.'); }
+}
+let lastFocus = null;
+function openShare(){
+  lastFocus = document.activeElement;
+  renderSummary();
+  const s=document.getElementById('shareScrim'); s.classList.add('open'); s.setAttribute('aria-hidden','false');
+  document.getElementById('closeShare').focus();
+}
+function closeShare(){
+  const s=document.getElementById('shareScrim'); s.classList.remove('open'); s.setAttribute('aria-hidden','true');
+  if(lastFocus) lastFocus.focus();
+}
+
+// ---------------- RENDER ----------------
+function render(){
+  renderScoreboard();
+  if(currentTab==='checklist') renderChecklist();
+  else { paintMap(); renderCountyDetail(); }
+}
+
+// ---------------- EVENTS ----------------
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentTab = btn.dataset.tab;
+    document.getElementById('checklistPanel').style.display = currentTab==='checklist' ? 'block' : 'none';
+    document.getElementById('mapPanel').style.display = currentTab==='map' ? 'block' : 'none';
+    render();
+  });
+});
+document.getElementById('searchBox').addEventListener('input', renderChecklist);
+document.getElementById('resetBtn').addEventListener('click', clearAll);
+document.getElementById('openShare').addEventListener('click', openShare);
+document.getElementById('closeShare').addEventListener('click', closeShare);
+document.getElementById('shareScrim').addEventListener('click', e=>{ if(e.target.id==='shareScrim') closeShare(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && document.getElementById('shareScrim').classList.contains('open')) closeShare(); });
+document.getElementById('doShare').addEventListener('click', doShare);
+document.getElementById('doCopy').addEventListener('click', copyText);
+document.getElementById('doSave').addEventListener('click', doSave);
+document.getElementById('sw0').style.background = bareColor();
+if(window.matchMedia) matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', ()=>{ document.getElementById('sw0').style.background=bareColor(); if(currentTab==='map') paintMap(); });
+
+loadState();
+</script>
+</body>
+</html>
